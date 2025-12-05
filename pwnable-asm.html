@@ -156,9 +156,14 @@
         }
 
         .header-image {
-            width: 100%;
+            max-width: 240px;
+            max-height: 180px;   /* ← This keeps tall images small */
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            margin: 8px auto 14px;
+            display: block;
             border-radius: 12px;
-            margin: 8px 0 14px;
             box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
         }
 
