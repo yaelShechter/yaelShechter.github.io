@@ -18,14 +18,11 @@
             --radius: 18px;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-            sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             background: radial-gradient(circle at top, #fdfbff 0, #f3f2ff 40%, #ebe9ff 100%);
             color: var(--text-main);
         }
@@ -127,12 +124,8 @@
         }
 
         @media (max-width: 780px) {
-            .layout {
-                grid-template-columns: minmax(0, 1fr);
-            }
-            header {
-                align-items: flex-start;
-            }
+            .layout { grid-template-columns: minmax(0, 1fr); }
+            header { align-items: flex-start; }
         }
 
         .card {
@@ -192,35 +185,48 @@
         }
 
         .writeup-item {
-            padding: 10px 11px;
+            display: grid;
+            grid-template-columns: 128px 1fr;
+            gap: 14px;
+            align-items: baseline;
+            padding: 12px 12px;
             border-radius: 12px;
             background: #faf8ff;
             border: 1px solid rgba(207, 198, 255, 0.7);
-            cursor: default;
         }
 
-        .writeup-title-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            margin-bottom: 4px;
-        }
-
-        .writeup-title {
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .writeup-meta {
-            font-size: 11px;
+        .writeup-date {
+            font-size: 13px;
             color: var(--text-muted);
+            opacity: 0.85;
             white-space: nowrap;
         }
 
+        .writeup-content { min-width: 0; }
+
+        .writeup-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            text-decoration: none;
+            line-height: 1.25;
+        }
+
+        .writeup-title:hover { text-decoration: underline; }
+
         .writeup-desc {
+            margin-top: 4px;
             font-size: 13px;
             color: var(--text-muted);
+        }
+
+        /* Mobile: stack date above title */
+        @media (max-width: 520px) {
+            .writeup-item {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+            .writeup-date { font-size: 12px; }
         }
 
         .chip {
@@ -232,9 +238,7 @@
             color: #4c3f8b;
         }
 
-        .side-card-section {
-            margin-bottom: 14px;
-        }
+        .side-card-section { margin-bottom: 14px; }
 
         .side-card-section h3 {
             margin: 0 0 6px;
@@ -254,18 +258,14 @@
             font-size: 13px;
         }
 
-        .link-list li {
-            margin-bottom: 2px;
-        }
+        .link-list li { margin-bottom: 2px; }
 
         .link-list a {
             color: var(--accent);
             text-decoration: none;
         }
 
-        .link-list a:hover {
-            text-decoration: underline;
-        }
+        .link-list a:hover { text-decoration: underline; }
 
         .footer-note {
             margin-top: 20px;
@@ -295,19 +295,15 @@
 <div class="page">
     <header>
         <div class="avatar">
-            <div class="avatar-inner">
-                Y
-            </div>
-            <div class="avatar-tag">
-                0xyael
-            </div>
+            <div class="avatar-inner">Y</div>
+            <div class="avatar-tag">0xyael</div>
         </div>
         <div class="head-text">
             <h1>Yael Shechter</h1>
             <div class="subtitle">
-                Software engineer exploring vulnerability research through hands-on exploitation.            </div>
-            <div class="tags">
+                Software engineer exploring vulnerability research through hands-on exploitation.
             </div>
+            <div class="tags"></div>
         </div>
     </header>
 
@@ -317,85 +313,65 @@
             <div class="section-title-row">
                 <h2>CTF Writeups</h2>
                 <span>
-            <span class="tiny-dot-row">
-              <span class="tiny-dot"></span><span class="tiny-dot"></span><span class="tiny-dot"></span>
-            </span>
-                    <!--            work in progress-->
-          </span>
+                    <span class="tiny-dot-row">
+                        <span class="tiny-dot"></span><span class="tiny-dot"></span><span class="tiny-dot"></span>
+                    </span>
+                </span>
             </div>
-            <p>
-            </p>
 
             <div class="pill-row">
-                <!--                <span class="pill">gdb and pwntools</span>-->
-                <!--                <span class="pill">ELF internals</span>-->
-                <!--                <span class="pill">GOT and PLT</span>-->
-                <!--                <span class="pill">cloud configs</span>-->
-                <!--                <span class="pill">reading way too many docs</span>-->
+                <!-- optional pills -->
             </div>
 
             <ul class="writeups-list">
                 <li class="writeup-item">
-                    <div class="writeup-title-row">
-                        <a href="pwnable-fd.html" class="writeup-title">pwnable.kr - fd</a>
-                        <div class="writeup-meta">
-                        </div>
-                    </div>
-                    <div class="writeup-desc">
+                    <div class="writeup-date">Nov 10, 2025</div>
+                    <div class="writeup-content">
+                        <a href="pwnable-fd.html" class="writeup-title">pwnable.kr: fd</a>
+                        <div class="writeup-desc"></div>
                     </div>
                 </li>
 
                 <li class="writeup-item">
-                    <div class="writeup-title-row">
-                        <a href="pwnable-asm.html" class="writeup-title">pwnable.kr - asm</a>
-                        <div class="writeup-meta">
-                        </div>
-                    </div>
-                    <div class="writeup-desc">
+                    <div class="writeup-date">Dec 5, 2025</div>
+                    <div class="writeup-content">
+                        <a href="pwnable-asm.html" class="writeup-title">pwnable.kr: asm</a>
+                        <div class="writeup-desc"></div>
                     </div>
                 </li>
 
                 <li class="writeup-item">
-                    <div class="writeup-title-row">
-                        <a href="pwnable-uaf.html" class="writeup-title">pwnable.kr - uaf</a>
-                        <div class="writeup-meta"></div>
-                    </div>
-                    <div class="writeup-desc">
-                    </div>
-                </li>
-
-                <li class="writeup-item">
-                    <div class="writeup-title-row">
-                        <div class="writeup-title">pwnable.kr - ascii_easy (WIP)</div>
-                        <div class="writeup-meta">
-                        </div>
-                    </div>
-                    <div class="writeup-desc">
+                    <div class="writeup-date">Dec 18, 2025</div>
+                    <div class="writeup-content">
+                        <a href="pwnable-uaf.html" class="writeup-title">pwnable.kr: uaf</a>
+                        <div class="writeup-desc"></div>
                     </div>
                 </li>
 
                 <li class="writeup-item">
-                    <div class="writeup-title-row">
-                        <div class="writeup-title">pwnable.kr - unlink (WIP)</div>
-                        <div class="writeup-meta">
-                        </div>
-                    </div>
-                    <div class="writeup-desc">
+                    <div class="writeup-date">Jan 1, 2026</div>
+                    <div class="writeup-content">
+                        <div class="writeup-title">pwnable.kr: ascii_easy (WIP)</div>
+                        <div class="writeup-desc"></div>
                     </div>
                 </li>
 
                 <li class="writeup-item">
-                    <div class="writeup-title-row">
-                        <div class="writeup-title">pwnable.kr - tiny_easy (WIP)</div>
-                        <div class="writeup-meta"></div>
+                    <div class="writeup-date">Jan 1, 2026</div>
+                    <div class="writeup-content">
+                        <div class="writeup-title">pwnable.kr: unlink (WIP)</div>
+                        <div class="writeup-desc"></div>
                     </div>
-                    <div class="writeup-desc">
+                </li>
+
+                <li class="writeup-item">
+                    <div class="writeup-date">Jan 1, 2026</div>
+                    <div class="writeup-content">
+                        <div class="writeup-title">pwnable.kr: tiny_easy (WIP)</div>
+                        <div class="writeup-desc"></div>
                     </div>
                 </li>
             </ul>
-
-            <p style="font-size:13px; margin-top:12px; color:var(--text-muted);">
-            </p>
         </section>
 
         <!-- right side -->
@@ -416,28 +392,18 @@
                         </a>
                     </li>
                     <li>
-<!--                        Email:-->
-<!--                        <a href="mailto:yael@example.com">-->
-<!--                            yael.sh84 at gmail.com-->
-<!--                        </a>-->
-                        <!-- replace with real address -->
+                        <!-- Email placeholder -->
                     </li>
                 </ul>
             </div>
 
             <div class="side-card-section">
-<!--                <h3>Hobbies</h3>-->
-<!--                <p>-->
-<!--                    - Playing piano-->
-<!--                    - Walking with my dog, Dobby-->
-<!--                    - -->
-<!--                </p>-->
+                <!-- optional -->
             </div>
         </aside>
     </main>
 
-    <div class="footer-note">
-    </div>
+    <div class="footer-note"></div>
 </div>
 </body>
 </html>
