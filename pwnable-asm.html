@@ -4,6 +4,19 @@
     <meta charset="UTF-8" />
     <title>pwnable.kr - asm</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+    <!-- syntax highlighting (only affects code blocks we mark with language-*) -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script defer>
+        window.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll("pre code.language-c, pre code.language-python")
+                .forEach((el) => window.hljs && hljs.highlightElement(el));
+        });
+    </script>
+
     <style>
         :root {
             --bg: #f7f5ff;
@@ -264,7 +277,7 @@ If this does not challenge you. you should play 'asg' challenge :)
 
             <p>Let's inspect the source code in <code>asm.c</code>:</p>
 
-            <pre><code>#include &lt;stdio.h&gt;
+            <pre><code class="language-c">#include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;sys/mman.h&gt;
@@ -322,7 +335,7 @@ int main(int argc, char* argv[]){
     ((void (*)(void))sh)();
     return 0;
 }
-</code></pre>
+</></pre>
 
             <p>There is a stub that runs before our payload. Disassembling it gives:</p>
 
@@ -360,7 +373,7 @@ f:  48 31 ff                xor    rdi,rdi
 
             <p>I started with a basic C program that opens the file and prints the content.</p>
 
-            <pre><code>#include &lt;stdlib.h&gt;
+            <pre><code class="language-c">#include &lt;stdlib.h&gt;
 #include &lt;fcntl.h&gt;
 #include &lt;unistd.h&gt;
 
@@ -488,7 +501,7 @@ Disassembly of section .text:
                 running process and passes the shellcode:
             </p>
 
-            <pre><code>from pwn import *
+            <pre><code class="language-python">from pwn import *
 
 context.arch = 'x86_64'
 

