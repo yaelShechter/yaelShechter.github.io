@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>pwnable.kr - leg</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+    <!-- syntax highlighting (only affects code blocks we mark with language-*) -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script defer>
+        window.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll("pre code.language-c, pre code.language-python, pre code.language-bash")
+                .forEach((el) => window.hljs && hljs.highlightElement(el));
+        });
+    </script>
+
+    <style>
+        :root {
+            --bg: #f7f5ff;
+            --card: #ffffff;
+            --accent: #8b6cff;
+            --accent-soft: #e0d8ff;
+            --text-main: #1f1f2e;
+            --text-muted: #6b6b80;
+            --border-soft: #e6e2ff;
+            --shadow-soft: 0 14px 40px rgba(34, 26, 79, 0.12);
+            --radius: 18px;
+            --code-bg: #111827;
+            --code-border: #374151;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #fdfbff 0, #f3f2ff 40%, #ebe9ff 100%);
+            color: var(--text-main);
+        }
+
+        .page {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 32px 18px 60px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: var(--radius);
+            padding: 22px 22px 26px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(201, 189, 255, 0.5);
+        }
+
+        h1 { margin: 0 0 8px; font-size: 24px; }
+        h2 { font-size: 18px; margin: 18px 0 10px; }
+        h3 { font-size: 16px; margin: 16px 0 8px; }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            line-height: 1.6;
+        }
+
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .tag {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: #3e346b;
+        }
+
+        article p {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-main);
+            margin: 0 0 10px;
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 13px;
+            background: rgba(0, 0, 0, 0.04);
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        pre {
+            margin: 10px 0 14px;
+            background: var(--code-bg);
+            color: #e5e7eb;
+            border-radius: 10px;
+            padding: 10px 12px;
+            overflow-x: auto;
+            border: 1px solid var(--code-border);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+        }
+
+        pre, pre code {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        ul, ol {
+            padding-left: 18px;
+            margin: 6px 0 14px;
+        }
+
+        li {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            margin-bottom: 14px;
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        .back-link span {
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-soft);
+            margin: 18px 0;
+        }
+
+        /* ensure highlight.js doesn't mess inline code */
+        .hljs { background: transparent; }
+    </style>
+</head>
+
+<body>
+<div class="page">
+    <a href="index.html" class="back-link">
+        <span>←</span> back to writeups
+    </a>
+
+    <div class="card">
+        <header>
+            <h1>leg</h1>
+            <div class="subtitle">
+            </div>
+            <div class="tag-row">
+                <div class="tag">Toddler's Bottle</div>
+                <div class="tag">Points: 5</div>
+                <div class="tag">Host: pwnable.kr</div>
+            </div>
+        </header>
+
+        <article>
+            <hr />
+
+            <p>We get the following hint:</p>
+
+            <pre><code class="language-bash">Daddy told me I should study ARM architecture.
+But I know Intel architecture and it should be similar.
+Why bother to study ARM?
+
+Download : http://pwnable.kr/bin/leg.c
+Download : http://pwnable.kr/bin/leg.asm
+
+ssh leg@pwnable.kr -p2222 (pw:guest)
+</code></pre>
+
+            <p>Connect using:</p>
+
+            <pre><code class="language-bash">ssh leg@pwnable.kr -p2222
+</code></pre>
+
+            <p>We get a BusyBox machine with the following information:</p>
+
+            <pre><code>/ $ uname -a
+Linux (none) 3.11.4 #5 Sat Oct 12 00:15:00 EDT 2013 armv5tejl GNU/Linux
+/ $ ls
+bin      dev      flag     linuxrc  root     sys
+boot     etc      leg      proc     sbin     usr
+/ $ whoami
+busy
+</code></pre>
+
+            <p>We are given the source code for <code>leg</code>, along with its disassembly.</p>
+
+            <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;fcntl.h&gt;
+int key1(){
+	asm("mov r3, pc\n");
+}
+int key2(){
+	asm(
+	"push	{r6}\n"
+	"add	r6, pc, $1\n"
+	"bx	r6\n"
+	".code   16\n"
+	"mov	r3, pc\n"
+	"add	r3, $0x4\n"
+	"push	{r3}\n"
+	"pop	{pc}\n"
+	".code	32\n"
+	"pop	{r6}\n"
+	);
+}
+int key3(){
+	asm("mov r3, lr\n");
+}
+int main(){
+	int key=0;
+	printf("Daddy has very strong arm! : ");
+	scanf("%d", &amp;key);
+	if( (key1()+key2()+key3()) == key ){
+		printf("Congratz!\n");
+		int fd = open("flag", O_RDONLY);
+		char buf[100];
+		int r = read(fd, buf, 100);
+		write(0, buf, r);
+	}
+	else{
+		printf("I have strong leg :P\n");
+	}
+	return 0;
+}
+</code></pre>
+
+            <p>The goal is to determine the return values of <code>key1</code>, <code>key2</code>, and <code>key3</code>, and provide their sum as input.</p>
+
+            <h3>General ARM notes</h3>
+
+            <p>On ARM, the return value of a function is stored in the <code>r0</code> register.<br />
+                Therefore, for each function we need to track what value ends up in <code>r0</code>.</p>
+
+            <h2>key1</h2>
+
+            <p>Disassembly:</p>
+
+            <pre><code>...
+0x00008cdc &lt;+8&gt;:  mov r3, pc
+0x00008ce0 &lt;+12&gt;: mov r0, r3
+...
+</code></pre>
+
+            <p>Here, <code>r0 = r3</code>, and <code>r3</code> is set to the value of <code>pc</code>. In ARM state, <code>pc</code> is the current instruction address + 8.
+                The <code>mov r3, pc</code> instruction is at <code>0x00008cdc</code>, so:</p>
+
+            <pre><code>pc = 0x00008cdc + 8 = 0x00008ce4
+</code></pre>
+
+            <p>Therefore, <strong>key1() = 0x00008ce4</strong>.</p>
+
+            <h3>key2</h3>
+
+            <p>Relevant instructions:</p>
+            <pre><code>...
+0x00008d04 &lt;+20&gt;:	mov	 r3, pc
+0x00008d06 &lt;+22&gt;:	adds r3, #4
+0x00008d10 &lt;+32&gt;:	mov	 r0, r3
+</code></pre>
+
+            <p>This part runs in <strong>Thumb mode</strong>, which we can see because the instruction at<br />
+                <code>0x00008d06</code> is at <code>0x00008d04 + 2</code>, indicating 16-bit instructions.
+                In Thumb mode, <code>pc</code> is the current instruction address + 4.</p>
+
+            <p>So:</p>
+            <pre><code>pc = 0x00008d04 + 4 = 0x00008d08
+r3 = 0x00008d08 + 4 = 0x00008d0c
+</code></pre>
+
+            <p>Thus <strong>key2() = 0x00008d0c</strong>.</p>
+
+            <h3>key3</h3>
+
+            <p>Disassembly:</p>
+            <pre><code>0x00008d28 &lt;+8&gt;:  mov r3, lr
+0x00008d2c &lt;+12&gt;: mov r0, r3
+</code></pre>
+
+            <p>Here, <code>r0 = r3</code>, and <code>r3</code> is loaded from <code>lr</code>. On ARM, <code>lr</code> contains the <strong>return address</strong> of the function.<br />
+                From <code>main</code>, the call to <code>key3</code> returns to:</p>
+
+            <pre><code>   0x00008d80 &lt;+68&gt;:	mov	r3, r0
+</code></pre>
+
+            <p>So <strong>key3() = 0x00008d80</strong>.</p>
+
+            <h3>Adding it all together</h3>
+
+            <pre><code>0x00008ce4
++0x00008d0c
++0x00008d80
+------------
+ 0x0001a770 = 108400
+</code></pre>
+
+            <p>Let's try:</p>
+
+            <pre><code>/ $ ./leg
+Daddy has very strong arm! : 108400
+Congratz!
+daddy_has_lot_of_ARM_muscl3
+</code></pre>
+
+            <p>Cool :)</p>
+        </article>
+    </div>
+</div>
+</body>
+</html>
