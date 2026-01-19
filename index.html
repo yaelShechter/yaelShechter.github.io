@@ -79,6 +79,13 @@
             border-radius: 8px;
             border: 1px solid #e2e8f0;
             transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .writeup-item a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
         }
 
         .writeup-item:hover {
@@ -100,11 +107,6 @@
             font-size: 16px;
             font-weight: 500;
             color: #2d3748;
-            text-decoration: none;
-        }
-
-        .writeup-title:hover {
-            color: #4299e1;
         }
 
         .writeup-date {
@@ -122,6 +124,13 @@
         .writeup-item.wip {
             background: #f7fafc;
             border-color: #edf2f7;
+            cursor: default;
+        }
+
+        .writeup-item.wip:hover {
+            border-color: #edf2f7;
+            box-shadow: none;
+            transform: none;
         }
 
         .writeup-item.wip .writeup-title {
@@ -149,9 +158,48 @@
                 padding: 20px;
             }
         }
+        /* Cat button */
+        .cat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #2d3748;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+
+        .cat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 4px 4px 0 #2d3748;
+        }
+
+        .cat-button:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
+<script src="js/oneko.js"></script>
+<script>
+    // Function to spawn multiple cats
+    function spawnCat() {
+        const script = document.createElement('script');
+        script.src = 'js/oneko.js';
+        document.body.appendChild(script);
+    }
+</script>
+
+<button class="cat-button" onclick="spawnCat()" title="Add a cat!">🐱</button>
+
 <div class="container">
     <header>
         <h1>Yael Shechter</h1>
@@ -166,43 +214,53 @@
         <h2 class="section-title">CTF Writeups</h2>
 
         <div class="writeup-item">
-            <div class="writeup-header">
-                <a href="pwnable-uaf.html" class="writeup-title">pwnable.kr: uaf</a>
-                <span class="writeup-date">Dec 2025</span>
-            </div>
-            <p class="writeup-desc">C++ use-after-free exploit with vtable hijacking</p>
+            <a href="pwnable-uaf.html">
+                <div class="writeup-header">
+                    <span class="writeup-title">pwnable.kr: uaf</span>
+                    <span class="writeup-date">Dec 2025</span>
+                </div>
+                <p class="writeup-desc">C++ use-after-free exploit with vtable hijacking</p>
+            </a>
         </div>
 
         <div class="writeup-item">
-            <div class="writeup-header">
-                <a href="pwnable-tiny_easy.html" class="writeup-title">pwnable.kr: tiny_easy</a>
-                <span class="writeup-date">Dec 2025</span>
-            </div>
-            <p class="writeup-desc">6-byte binary with heap spraying and ASLR bypass</p>
+            <a href="pwnable-tiny_easy.html">
+                <div class="writeup-header">
+                    <span class="writeup-title">pwnable.kr: tiny_easy</span>
+                    <span class="writeup-date">Dec 2025</span>
+                </div>
+                <p class="writeup-desc">6-byte binary with heap spraying and ASLR bypass</p>
+            </a>
         </div>
 
         <div class="writeup-item">
-            <div class="writeup-header">
-                <a href="pwnable-asm.html" class="writeup-title">pwnable.kr: asm</a>
-                <span class="writeup-date">Nov 2025</span>
-            </div>
-            <p class="writeup-desc">Writing shellcode under seccomp sandbox restrictions</p>
+            <a href="pwnable-asm.html">
+                <div class="writeup-header">
+                    <span class="writeup-title">pwnable.kr: asm</span>
+                    <span class="writeup-date">Nov 2025</span>
+                </div>
+                <p class="writeup-desc">Writing shellcode under seccomp sandbox restrictions</p>
+            </a>
         </div>
 
         <div class="writeup-item">
-            <div class="writeup-header">
-                <a href="pwnable-leg.html" class="writeup-title">pwnable.kr: leg</a>
-                <span class="writeup-date">Nov 2025</span>
-            </div>
-            <p class="writeup-desc">ARM assembly reverse engineering with PC register calculations</p>
+            <a href="pwnable-leg.html">
+                <div class="writeup-header">
+                    <span class="writeup-title">pwnable.kr: leg</span>
+                    <span class="writeup-date">Nov 2025</span>
+                </div>
+                <p class="writeup-desc">ARM assembly reverse engineering with PC register calculations</p>
+            </a>
         </div>
 
         <div class="writeup-item">
-            <div class="writeup-header">
-                <a href="pwnable-fd.html" class="writeup-title">pwnable.kr: fd</a>
-                <span class="writeup-date">Nov 2025</span>
-            </div>
-            <p class="writeup-desc">File descriptor manipulation and Linux I/O fundamentals</p>
+            <a href="pwnable-fd.html">
+                <div class="writeup-header">
+                    <span class="writeup-title">pwnable.kr: fd</span>
+                    <span class="writeup-date">Nov 2025</span>
+                </div>
+                <p class="writeup-desc">File descriptor manipulation and Linux I/O fundamentals</p>
+            </a>
         </div>
 
         <div class="writeup-item wip">
