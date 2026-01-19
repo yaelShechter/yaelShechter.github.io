@@ -65,6 +65,26 @@
             color: #2b6cb0;
         }
 
+        .nav-links {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .nav-links a {
+            color: #718096;
+            text-decoration: none;
+            font-size: 14px;
+            padding-bottom: 2px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #2d3748;
+            border-bottom-color: #2d3748;
+        }
+
         .section-title {
             font-size: 22px;
             font-weight: 700;
@@ -188,9 +208,8 @@
     </style>
 </head>
 <body>
-<script src="js/oneko.js"></script>
 <script>
-    // Function to spawn multiple cats
+    // Function to spawn cats only when button is clicked
     function spawnCat() {
         const script = document.createElement('script');
         script.src = 'js/oneko.js';
@@ -202,6 +221,10 @@
 
 <div class="container">
     <header>
+        <div class="nav-links">
+            <a href="index.html">Writeups</a>
+            <a href="about.html">About</a>
+        </div>
         <h1>Yael Shechter</h1>
         <p class="subtitle">Software engineer exploring vulnerability research through hands-on binary exploitation and CTF challenges</p>
         <div class="links">

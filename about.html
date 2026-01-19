@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Yael Shechter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #fafafa;
+            color: #2d3748;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        header {
+            margin-bottom: 64px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1a202c;
+            letter-spacing: -0.02em;
+        }
+
+        .back-link {
+            color: #4299e1;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .back-link:hover {
+            color: #2b6cb0;
+        }
+
+        .back-link::before {
+            content: '← ';
+        }
+
+        .content {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .content h2 {
+            font-family: 'Fira Code', monospace;
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-top: 32px;
+            margin-bottom: 16px;
+        }
+
+        .content h2:first-child {
+            margin-top: 0;
+        }
+
+        .content p {
+            margin-bottom: 16px;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .content ul {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        .content li {
+            margin-bottom: 8px;
+        }
+
+        .content code {
+            font-family: 'Fira Code', monospace;
+            background: #f7fafc;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 14px;
+            color: #2d3748;
+        }
+
+        /* Cat button */
+        .cat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #2d3748;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+
+        .cat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 4px 4px 0 #2d3748;
+        }
+
+        .cat-button:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            .content {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+<script>
+    function spawnCat() {
+        const script = document.createElement('script');
+        script.src = 'js/oneko.js';
+        document.body.appendChild(script);
+    }
+</script>
+
+<button class="cat-button" onclick="spawnCat()" title="Add a cat!">🐱</button>
+
+<div class="container">
+    <header>
+        <a href="index.html" class="back-link">Back to writeups</a>
+        <h1>About</h1>
+    </header>
+
+    <div class="content">
+        <h2>Who I am</h2>
+        <p>
+        </p>
+
+        <h2>Why CTFs and security research</h2>
+        <p>
+        </p>
+        <p>
+        </p>
+
+        <h2>What I'm learning</h2>
+        <p>
+        </p>
+        <ul>
+
+        </ul>
+
+        <h2>Technical background</h2>
+        <p>
+        </p>
+
+        <h2>About the writeups</h2>
+        <p>
+        </p>
+
+        <h2>Outside of security</h2>
+        <p>
+        </p>
+    </div>
+</div>
+</body>
+</html>
