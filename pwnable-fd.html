@@ -1,213 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>pwnable.kr - fd</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pwnable.kr: fd - Yael Shechter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- syntax highlighting (only affects code blocks we mark with language-*) -->
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script defer>
-        window.addEventListener("DOMContentLoaded", () => {
-            document.querySelectorAll("pre code.language-c, pre code.language-python, pre code.language-bash")
-                .forEach((el) => window.hljs && hljs.highlightElement(el));
-        });
-    </script>
+    <!-- Syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
 
     <style>
-        :root {
-            --bg: #f7f5ff;
-            --card: #ffffff;
-            --accent: #8b6cff;
-            --accent-soft: #e0d8ff;
-            --text-main: #1f1f2e;
-            --text-muted: #6b6b80;
-            --border-soft: #e6e2ff;
-            --shadow-soft: 0 14px 40px rgba(34, 26, 79, 0.12);
-            --radius: 18px;
-            --code-bg: #111827;
-            --code-border: #374151;
-        }
-
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
 
         body {
-            margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-            sans-serif;
-            background: radial-gradient(circle at top, #fdfbff 0, #f3f2ff 40%, #ebe9ff 100%);
-            color: var(--text-main);
+            font-family: 'DM Sans', sans-serif;
+            background: #fafafa;
+            color: #2d3748;
+            line-height: 1.7;
         }
 
-        .page {
+        .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 32px 18px 60px;
+            padding: 60px 24px;
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.96);
-            border-radius: var(--radius);
-            padding: 22px 22px 26px;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid rgba(201, 189, 255, 0.5);
+        header {
+            margin-bottom: 64px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .back-link {
+            color: #4299e1;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .back-link:hover {
+            color: #2b6cb0;
+        }
+
+        .back-link::before {
+            content: '← ';
         }
 
         h1 {
-            margin: 0 0 8px;
-            font-size: 24px;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1a202c;
+            letter-spacing: -0.02em;
         }
 
-        .subtitle {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 14px;
-        }
-
-        .tag-row {
+        .meta {
             display: flex;
+            gap: 16px;
             flex-wrap: wrap;
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tags {
+            display: flex;
             gap: 8px;
-            margin-bottom: 18px;
+            flex-wrap: wrap;
+            margin-top: 16px;
         }
 
         .tag {
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: var(--accent-soft);
-            color: #3e346b;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 4px;
+            background: #edf2f7;
+            color: #4a5568;
+            font-family: 'Fira Code', monospace;
         }
 
-        article p {
-            font-size: 14px;
-            line-height: 1.7;
-            color: var(--text-main);
-            margin: 0 0 10px;
+        article {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
         }
 
         article h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-top: 40px;
+            margin-bottom: 16px;
+        }
+
+        article h2:first-child {
+            margin-top: 0;
+        }
+
+        article h3 {
             font-size: 18px;
-            margin: 18px 0 10px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-top: 32px;
+            margin-bottom: 12px;
+        }
+
+        article p {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 16px;
+            color: #2d3748;
+        }
+
+        article ul, article ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        article li {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+
+        article a {
+            color: #4299e1;
+            text-decoration: none;
+        }
+
+        article a:hover {
+            text-decoration: underline;
         }
 
         code {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-            "Liberation Mono", "Courier New", monospace;
-            font-size: 13px;
-            background: rgba(0, 0, 0, 0.04);
-            padding: 2px 4px;
-            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            background: #f7fafc;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #2d3748;
         }
 
         pre {
-            margin: 10px 0 14px;
-            background: var(--code-bg);
-            color: #e5e7eb;
-            border-radius: 10px;
-            padding: 10px 12px;
+            background: #1a202c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
             overflow-x: auto;
-            border: 1px solid var(--code-border);
-            font-size: 13px;
-            line-height: 1.5;
+            border: 1px solid #2d3748;
         }
 
         pre code {
             background: none;
             padding: 0;
-        }
-
-        ul {
-            padding-left: 18px;
-            margin: 6px 0 14px;
-        }
-
-        li {
+            color: #e2e8f0;
             font-size: 14px;
             line-height: 1.6;
-            color: var(--text-main);
-            margin-bottom: 4px;
         }
 
-        .meta {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 4px;
-            margin-bottom: 6px;
+        .hljs {
+            background: transparent;
+            color: #e2e8f0;
         }
 
-        a {
-            color: var(--accent);
-            text-decoration: none;
+        hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 32px 0;
         }
 
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .back-link {
-            display: inline-flex;
+        .cat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #2d3748;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            margin-bottom: 14px;
-            color: var(--text-muted);
-            text-decoration: none;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 1000;
         }
 
-        .back-link:hover {
-            color: var(--accent);
-            text-decoration: underline;
+        .cat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 4px 4px 0 #2d3748;
         }
 
-        .back-link span {
-            font-size: 16px;
-            line-height: 1;
+        .cat-button:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            article {
+                padding: 24px;
+            }
+
+            pre {
+                padding: 16px;
+            }
         }
     </style>
 </head>
 <body>
-<div class="page">
-    <a href="index.html" class="back-link">
-        <span>←</span> back to writeups
-    </a>
 
-    <div class="card">
-        <header>
-            <h1>pwnable.kr - fd</h1>
+<div class="container">
+    <header>
+        <a href="index.html" class="back-link">Back to writeups</a>
+        <h1>pwnable.kr: fd</h1>
+        <div class="meta">
+            <span>📅 Nov 2025</span>
+            <span>🏆 1 point</span>
+            <span>📂 Toddler's Bottle</span>
+        </div>
+        <div class="tags">
+            <span class="tag">file descriptors</span>
+            <span class="tag">Linux I/O</span>
+            <span class="tag">stdin</span>
+        </div>
+    </header>
 
-            <div class="tag-row">
-                <div class="tag">Toddler's Bottle</div>
-                <div class="tag">Points: 1</div>
-                <div class="tag">Host: pwnable.kr</div>
-            </div>
-        </header>
+    <article>
+        <h2>Challenge Description</h2>
+        <p>First, we get this hint:</p>
 
-        <article>
-            <hr />
+        <pre><code>Mommy! what is a file descriptor in Linux?
 
-            <p>First, we get this hint:</p>
+ssh fd@pwnable.kr -p2222</code></pre>
 
-            <pre><code>Mommy! what is a file descriptor in Linux?
+        <p>
+            In the terminal, I run <code>ssh fd@pwnable.kr -p2222</code> and connect to the server.
+            In <code>/home/fd</code> there are three files: <code>fd</code>, <code>fd.c</code> and
+            <code>flag</code>. Running <code>cat flag</code> gives “permission denied”, so we
+            cannot read it directly.
+        </p>
 
-ssh fd@pwnable.kr -p2222
-</code></pre>
+        <h2>Source Code Analysis</h2>
+        <p>Opening <code>fd.c</code> shows:</p>
 
-            <p>
-                In the terminal, I run <code>ssh fd@pwnable.kr -p2222</code> and connect to the server.
-                In <code>/home/fd</code> there are three files: <code>fd</code>, <code>fd.c</code> and
-                <code>flag</code>. Running <code>cat flag</code> gives “permission denied”, so we
-                cannot read it directly.
-            </p>
-
-            <p>Opening <code>fd.c</code> shows:</p>
-
-            <pre><code class="language-c">#include &lt;stdio.h&gt;
+        <pre><code class="language-c">#include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;string.h&gt;
 char buf[32];
@@ -227,71 +286,46 @@ int main(int argc, char* argv[], char* envp[]){
     }
     printf("learn about Linux file IO\n");
     return 0;
-}
-</code></pre>
+}</code></pre>
 
-            <p>
-                Our only option is to run the binary and hit the correct path to read the flag.
-            </p>
+        <p>Our only option is to run the binary and hit the correct path to read the flag.</p>
 
-            <p>
-                The program expects a number in <code>argv[1]</code>, so we run
-                <code>./fd &lt;some-number&gt;</code>. That string is converted to an integer with
-                <code>atoi</code>, then <code>0x1234</code> is subtracted and the result is stored
-                in <code>fd</code>. The program then calls <code>read(fd, buf, 32)</code>. If
-                <code>buf</code> equals <code>"LETMEWIN\n"</code> the program prints the flag.
-            </p>
+        <p>The program expects a number in <code>argv[1]</code>, so we run
+            <code>./fd &lt;some-number&gt;</code>. That string is converted to an integer with
+            <code>atoi</code>, then <code>0x1234</code> is subtracted and the result is stored
+            in <code>fd</code>. The program then calls <code>read(fd, buf, 32)</code>. If
+            <code>buf</code> equals <code>"LETMEWIN\n"</code> the program prints the flag.</p>
 
-            <p>
-                To get <code>"LETMEWIN\n"</code> we need to understand file descriptors and how they
-                are used in Linux.
-            </p>
+        <h2>Understanding File Descriptors</h2>
+        <p>To get <code>"LETMEWIN\n"</code> we need to understand file descriptors and how they
+            are used in Linux.</p>
 
-            <p>
-                A file descriptor (FD) represents an open file in the operating system. Every time a
-                new file is opened, the OS assigns a file descriptor to it. Common FDs are:
-                <code>0 = stdin</code>, <code>1 = stdout</code>, <code>2 = stderr</code>.
-            </p>
+        <p>A file descriptor (FD) represents an open file in the operating system. Every time a
+            new file is opened, the OS assigns a file descriptor to it. Common FDs are:
+            <code>0 = stdin</code>, <code>1 = stdout</code>, <code>2 = stderr</code>.</p>
 
-            <p>
-                In this case, we want to read some word from a file into the buffer. The easiest way
-                is to read from standard input. When we call <code>read(0, ...)</code> the program
-                waits for user input. So we want <code>fd</code> to be equal to <code>0</code>. This
-                happens when <code>argv[1] == 0x1234</code>.
-            </p>
+        <p>In this case, we want to read some word from a file into the buffer. The easiest way
+            is to read from standard input. When we call <code>read(0, ...)</code> the program
+            waits for user input. So we want <code>fd</code> to be equal to <code>0</code>. This
+            happens when <code>argv[1] == 0x1234</code>.</p>
 
-            <p>
-                When passing <code>0x1234</code> as an argument, we get the
-                <code>"learn about Linux file IO"</code> message. That is because <code>atoi</code>
-                converts only decimal numbers. When the input starts with <code>0x...</code>,
-                <code>atoi</code> returns <code>0</code>, so <code>fd</code> becomes a negative
-                number.
-            </p>
+        <h2>Solution</h2>
+        <p>When passing <code>0x1234</code> as an argument, we get the
+            <code>"learn about Linux file IO"</code> message. That is because <code>atoi</code>
+            converts only decimal numbers. When the input starts with <code>0x...</code>,
+            <code>atoi</code> returns <code>0</code>, so <code>fd</code> becomes a negative
+            number.</p>
 
-            <p>
-                When we pass the decimal number <code>4660</code> (which is equivalent to
-                <code>0x1234</code>), with <code>./fd 4660</code>, the program stops and waits for
-                input. If we type <code>LETMEWIN</code> and press Enter, we get the flag.
-            </p>
+        <p>When we pass the decimal number <code>4660</code> (which is equivalent to
+            <code>0x1234</code>), with <code>./fd 4660</code>, the program stops and waits for
+            input. If we type <code>LETMEWIN</code> and press Enter, we get the flag.</p>
 
-            <hr />
-
-            <h2>Other ways to complete this challenge</h2>
-            <ul>
-                <li><code>echo "LETMEWIN" | ./fd 4660</code> (non interactive).</li>
-            </ul>
-
-            <h2>Tricks</h2>
-            <ul>
-                <li>
-                    Running <code>./fd $((0x1234))</code> also works. The
-                    <code>$(( expression ))</code> syntax performs shell arithmetic, which lets us do
-                    math directly in the command line. It automatically converts hex into decimal,
-                    so the value passed as <code>argv[1]</code> is <code>4660</code>.
-                </li>
-            </ul>
-        </article>
-    </div>
+        <h2>Alternative Solutions</h2>
+        <ul>
+            <li><code>echo "LETMEWIN" | ./fd 4660</code> (non-interactive)</li>
+            <li><code>./fd $((0x1234))</code> also works - the <code>$(( expression ))</code> syntax performs shell arithmetic and automatically converts hex to decimal</li>
+        </ul>
+    </article>
 </div>
 </body>
 </html>

