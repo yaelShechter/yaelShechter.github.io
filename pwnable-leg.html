@@ -118,6 +118,15 @@
             font-family: 'Fira Code', monospace;
         }
 
+        .banner{
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 16px;      /* optional, matches card vibe */
+            margin: 16px 0 24px;
+        }
+
         article {
             background: white;
             padding: 40px;
@@ -256,15 +265,6 @@
     </style>
 </head>
 <body>
-<script>
-    function spawnCat() {
-        const script = document.createElement('script');
-        script.src = 'js/oneko.js';
-        document.body.appendChild(script);
-    }
-</script>
-
-<button class="cat-button" onclick="spawnCat()" title="Add a cat!">🐱</button>
 
 <div class="container">
     <header>
@@ -286,6 +286,8 @@
     </header>
 
     <article>
+        <img src="images/pwnable-banner.png" alt="banner" class="banner" />
+
         <h2>Challenge Description</h2>
         <p>We get the following hint:</p>
 
@@ -298,7 +300,6 @@ Download : http://pwnable.kr/bin/leg.asm
 
 ssh leg@pwnable.kr -p2222 (pw:guest)</code></pre>
 
-        <h2>Initial Reconnaissance</h2>
         <p>Connect using:</p>
 
         <pre><code class="language-bash">ssh leg@pwnable.kr -p2222</code></pre>
