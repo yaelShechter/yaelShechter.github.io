@@ -96,6 +96,50 @@
             letter-spacing: -0.02em;
         }
 
+        /* CSS for the Copy Button */
+        pre {
+            position: relative; /* Required for absolute positioning of the button */
+            background: #1a202c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            border: 1px solid #2d3748;
+            max-width: 100%;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            background: #2d3748;
+            color: #e2e8f0;
+            border: 1px solid #4a5568;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            opacity: 0; /* Hidden by default */
+        }
+
+        pre:hover .copy-button {
+            opacity: 1; /* Show on hover */
+        }
+
+        .copy-button:hover {
+            background: #4a5568;
+            color: white;
+        }
+
+        .copy-button.copied {
+            background: #48bb78;
+            border-color: #48bb78;
+            color: white;
+        }
+
+
         .meta {
             display: flex;
             gap: 16px;
@@ -873,6 +917,37 @@ Must_san1tize_Us3r_p0int3r</code></pre>
         </ul>
     </article>
 </div>
+
+<script>
+    document.querySelectorAll('pre').forEach((codeBlock) => {
+        // Create the button
+        const button = document.createElement('button');
+        button.className = 'copy-button';
+        button.type = 'button';
+        button.innerText = 'Copy';
+
+        // Append button to the pre element
+        codeBlock.appendChild(button);
+
+        button.addEventListener('click', () => {
+            // Get the text from the <code> tag inside the <pre>
+            const code = codeBlock.querySelector('code').innerText;
+
+            navigator.clipboard.writeText(code).then(() => {
+                button.innerText = 'Copied!';
+                button.classList.add('copied');
+
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.innerText = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        });
+    });
+</script>
 
 </body>
 
