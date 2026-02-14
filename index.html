@@ -183,6 +183,29 @@
             color: #cbd5e0;
         }
 
+        .featured-badge {
+            font-size: 12px;
+            font-weight: 500;
+            color: #d69e2e;
+            background: #fefcbf;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        .featured-section {
+            margin-bottom: 48px;
+        }
+
+        .featured-section .section-title {
+            margin-bottom: 24px;
+        }
+
+        .all-section .section-title {
+            margin-bottom: 24px;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 28px;
@@ -274,7 +297,41 @@
     </header>
 
     <main>
+        <div class="featured-section">
+            <h2 class="section-title">Featured</h2>
+
+            <div class="writeup-item">
+                <a href="pwnable-syscall.html">
+                    <div class="writeup-header">
+                        <span class="writeup-title">pwnable.kr: syscall<span class="featured-badge">featured</span></span>
+                        <span class="writeup-date">Jan 2026</span>
+                    </div>
+                    <p class="writeup-desc">Kernel syscall table manipulation and privilege escalation</p>
+                </a>
+            </div>
+
+            <div class="writeup-item">
+                <a href="pwnable-uaf.html">
+                    <div class="writeup-header">
+                        <span class="writeup-title">pwnable.kr: uaf<span class="featured-badge">featured</span></span>
+                        <span class="writeup-date">Dec 2025</span>
+                    </div>
+                    <p class="writeup-desc">C++ use-after-free exploit with vtable hijacking</p>
+                </a>
+            </div>
+        </div>
+
         <h2 class="section-title">CTF Writeups</h2>
+
+        <div class="writeup-item">
+            <a href="pwnable-horcruxes.html">
+                <div class="writeup-header">
+                    <span class="writeup-title">pwnable.kr: horcrux</span>
+                    <span class="writeup-date">Feb 2026</span>
+                </div>
+                <p class="writeup-desc">ROP chain and buffer overflow exploitation</p>
+            </a>
+        </div>
 
         <div class="writeup-item">
             <a href="pwnable-syscall.html">
