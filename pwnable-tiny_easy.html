@@ -351,7 +351,7 @@ PIE:        No PIE (0x8048000)</code></pre>
         <p>So if <code>argv[0]</code> starts with <code>/home/...</code>, the first 4 bytes are <code>'/hom'</code>. Interpreted as a little endian value:</p>
         <pre><code>'/hom' => 0x6d6f682f</code></pre>
 
-        <p>Just to verify, I run the binary from <code>/tmp/yael/tiny_easy</code> and now it tries to jump to <code>'/tmp'</code> instead. So the crash address is directly controlled by the contents of <code>argv[0]</code>.</p>
+        <p>Just to verify, I run the binary from <code>/tmp/exp/tiny_easy</code> and now it tries to jump to <code>'/tmp'</code> instead. So the crash address is directly controlled by the contents of <code>argv[0]</code>.</p>
 
         <p>Since <code>argv[0]</code> is attacker controlled and can contain raw bytes, this gives direct control over the jump target.</p>
 

