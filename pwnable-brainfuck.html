@@ -1,39 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="description" content="Detailed pwnable.kr brainfuck writeup covering GOT overwrite, function chaining via setvbuf and putchar, and gaining a shell through a brainfuck interpreter exploit." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pwnable.kr: brainfuck writeup</title>
+    <title>pwnable.kr: brainfuck Writeup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="canonical" href="https://yaelshechter.github.io/pwnable-brainfuck.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Yael Shechter - Security Research" />
+    <meta property="og:title" content="pwnable.kr: brainfuck Writeup" />
+    <meta property="og:description" content="Detailed pwnable.kr brainfuck writeup covering GOT overwrite, function chaining via setvbuf and putchar, and gaining a shell through a brainfuck interpreter exploit." />
+    <meta property="og:url" content="https://yaelshechter.github.io/pwnable-brainfuck.html" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="pwnable.kr: brainfuck Writeup" />
+    <meta name="twitter:description" content="Detailed pwnable.kr brainfuck writeup covering GOT overwrite, function chaining via setvbuf and putchar, and gaining a shell through a brainfuck interpreter exploit." />
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "TechArticle",
+            "headline": "pwnable.kr brainfuck Writeup - GOT Overwrite and Function Chaining",
+            "author": {
+                "@type": "Person",
+                "name": "Yael Shechter",
+                "url": "https://yaelshechter.github.io/"
+            },
+            "datePublished": "2026-03-01",
+            "dateModified": "2026-03-01",
+            "keywords": ["pwnable.kr", "brainfuck", "GOT overwrite", "function chaining", "binary exploitation", "CTF writeup"],
+            "url": "https://yaelshechter.github.io/pwnable-brainfuck.html"
+        }
+    </script>
+
+    <!-- Syntax highlighting -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script>hljs.highlightAll();</script>
+
     <link rel="stylesheet" href="css/writeup.css">
-    <link rel="icon" type="image/png" href="images/favicon.png">
-    <meta name="description" content="GOT overwrite and function chaining in a brainfuck interpreter exploit">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-88239B8JH3"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-88239B8JH3');
+    </script>
 </head>
 <body>
-<nav class="top-nav">
-    <a href="index.html" class="back-link">Back to writeups</a>
-</nav>
-
-<article class="writeup">
-    <header class="writeup-header">
+<div class="container">
+    <header>
+        <a href="index.html" class="back-link">Back to writeups</a>
         <h1>pwnable.kr: brainfuck writeup</h1>
-        <div class="writeup-meta">
+        <div class="meta">
             <span>📅 Mar 2026</span>
             <span>🏆 100 points</span>
             <span>📂 Rookiss</span>
         </div>
-        <div class="writeup-tags">
+        <div class="tags">
             <span class="tag">GOT overwrite</span>
             <span class="tag">function chaining</span>
             <span class="tag">brainfuck</span>
             <span class="tag">libc</span>
         </div>
-        <img src="images/pwnable-banner.png" alt="banner" class="writeup-banner">
     </header>
 
-    <section class="writeup-content">
+    <article>
+        <img src="images/pwnable-banner.png" alt="pwnable.kr banner" class="banner" />
         <h2>Challenge Description</h2>
 
         <p>We get the following hint:</p>
@@ -266,10 +304,10 @@ $ cd brainfuck_pwn
 $ cat flag
 bR41n_F4ck_Is_FuN_LanguaG3</code></pre>
 
-        <p><strong>Bazinga :)</strong></p>
+        <p>Bazinga :)</p>
 
-    </section>
-</article>
+    </article>
+</div>
 <script src="js/writeup.js"></script>
 </body>
 </html>
