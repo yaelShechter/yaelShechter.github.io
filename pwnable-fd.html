@@ -9,7 +9,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="canonical" href="https://yaelshechter.com/pwnable-fd.html" />
+    <link rel="canonical" href="https://yaelshechter.github.io/pwnable-fd.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Yael Shechter - Security Research" />
+    <meta property="og:title" content="pwnable.kr: fd Writeup" />
+    <meta property="og:description" content="Detailed pwnable.kr fd challenge writeup, explaining file descriptors and Linux I/O concepts." />
+    <meta property="og:url" content="https://yaelshechter.github.io/pwnable-fd.html" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="pwnable.kr: fd Writeup" />
+    <meta name="twitter:description" content="Detailed pwnable.kr fd challenge writeup, explaining file descriptors and Linux I/O concepts." />
 
     <script type="application/ld+json">
         {
@@ -33,231 +41,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script>hljs.highlightAll();</script>
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: #fafafa;
-            color: #2d3748;
-            line-height: 1.7;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 60px 24px;
-        }
-
-        header {
-            margin-bottom: 64px;
-            padding-bottom: 32px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .back-link {
-            color: #4299e1;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 500;
-            transition: color 0.2s;
-            display: inline-block;
-            margin-bottom: 24px;
-        }
-
-        .back-link:hover {
-            color: #2b6cb0;
-        }
-
-        .back-link::before {
-            content: '← ';
-        }
-
-        .banner{
-            width: 100%;
-            max-width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 16px;      /* optional, matches card vibe */
-            margin: 16px 0 24px;
-        }
-
-
-        h1 {
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: #1a202c;
-            letter-spacing: -0.02em;
-        }
-
-        .meta {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            font-size: 14px;
-            color: #718096;
-            margin-bottom: 8px;
-        }
-
-        .meta span {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .tags {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 16px;
-        }
-
-        .tag {
-            font-size: 12px;
-            padding: 4px 12px;
-            border-radius: 4px;
-            background: #edf2f7;
-            color: #4a5568;
-            font-family: 'Fira Code', monospace;
-        }
-
-        article {
-            background: white;
-            padding: 40px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-        }
-
-        article h2 {
-            font-size: 22px;
-            font-weight: 700;
-            color: #1a202c;
-            margin-top: 40px;
-            margin-bottom: 16px;
-        }
-
-        article h2:first-child {
-            margin-top: 0;
-        }
-
-        article h3 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #2d3748;
-            margin-top: 32px;
-            margin-bottom: 12px;
-        }
-
-        article p {
-            font-size: 16px;
-            line-height: 1.7;
-            margin-bottom: 16px;
-            color: #2d3748;
-        }
-
-        article ul, article ol {
-            margin-left: 24px;
-            margin-bottom: 16px;
-        }
-
-        article li {
-            font-size: 16px;
-            line-height: 1.7;
-            margin-bottom: 8px;
-        }
-
-        article a {
-            color: #4299e1;
-            text-decoration: none;
-        }
-
-        article a:hover {
-            text-decoration: underline;
-        }
-
-        code {
-            font-family: 'Fira Code', monospace;
-            font-size: 14px;
-            background: #f7fafc;
-            padding: 2px 6px;
-            border-radius: 3px;
-            color: #2d3748;
-        }
-
-        pre {
-            background: #1a202c;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-            overflow-x: auto;
-            border: 1px solid #2d3748;
-        }
-
-        pre code {
-            background: none;
-            padding: 0;
-            color: #e2e8f0;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .hljs {
-            background: transparent;
-            color: #e2e8f0;
-        }
-
-        hr {
-            border: none;
-            border-top: 1px solid #e2e8f0;
-            margin: 32px 0;
-        }
-
-        .cat-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: white;
-            border: 2px solid #2d3748;
-            cursor: pointer;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            z-index: 1000;
-        }
-
-        .cat-button:hover {
-            transform: scale(1.1);
-            box-shadow: 4px 4px 0 #2d3748;
-        }
-
-        .cat-button:active {
-            transform: scale(0.95);
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 28px;
-            }
-
-            article {
-                padding: 24px;
-            }
-
-            pre {
-                padding: 16px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/writeup.css">
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-88239B8JH3"></script>
@@ -265,7 +49,6 @@
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-
         gtag('config', 'G-88239B8JH3');
     </script>
 </head>
@@ -368,5 +151,6 @@ int main(int argc, char* argv[], char* envp[]){
         </ul>
     </article>
 </div>
+<script src="js/writeup.js"></script>
 </body>
 </html>

