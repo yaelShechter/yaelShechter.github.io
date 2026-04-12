@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="description" content="What Yael Shechter is currently working on - ongoing CTF challenges and security research." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currently | Yael Shechter</title>
+    <link rel="canonical" href="https://yaelshechter.github.io/currently.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Yael Shechter - Security Research" />
+    <meta property="og:title" content="Currently | Yael Shechter" />
+    <meta property="og:description" content="What Yael Shechter is currently working on - ongoing CTF challenges and security research." />
+    <meta property="og:url" content="https://yaelshechter.github.io/currently.html" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Currently | Yael Shechter" />
+    <meta name="twitter:description" content="What Yael Shechter is currently working on - ongoing CTF challenges and security research." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-88239B8JH3"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-88239B8JH3');
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #fafafa;
+            color: #2d3748;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        header {
+            margin-bottom: 64px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1a202c;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .nav-links a {
+            color: #718096;
+            text-decoration: none;
+            font-size: 14px;
+            padding-bottom: 2px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #2d3748;
+            border-bottom-color: #2d3748;
+        }
+
+        .writeup-item {
+            background: #f7fafc;
+            padding: 28px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #edf2f7;
+        }
+
+        .writeup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 20px;
+        }
+
+        .writeup-title {
+            font-family: 'Fira Code', monospace;
+            font-size: 16px;
+            font-weight: 500;
+            color: #a0aec0;
+        }
+
+        .writeup-date {
+            font-size: 14px;
+            color: #a0aec0;
+            white-space: nowrap;
+        }
+
+        .writeup-status {
+            font-size: 13px;
+            color: #cbd5e0;
+            margin-top: 6px;
+            font-family: 'Fira Code', monospace;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="nav-links">
+            <a href="index.html">Writeups</a>
+            <a href="currently.html">Currently</a>
+            <a href="about.html">About</a>
+        </div>
+        <h1>Currently</h1>
+    </header>
+
+    <main>
+        <div class="writeup-item">
+            <div class="writeup-header">
+                <span class="writeup-title">pwnable.kr: exynos</span>
+                <span class="writeup-date">Apr 2026</span>
+            </div>
+            <div class="writeup-status">solved, writeup in progress</div>
+        </div>
+
+        <div class="writeup-item">
+            <div class="writeup-header">
+                <span class="writeup-title">pwnable.kr: towelroot</span>
+                <span class="writeup-date">Apr 2026</span>
+            </div>
+            <div class="writeup-status">kernel exploitation of futex mechanism, CVE-2014-3153</div>
+        </div>
+
+        <div class="writeup-item">
+            <div class="writeup-header">
+                <span class="writeup-title">router firmware analysis</span>
+                <span class="writeup-date">Apr 2026</span>
+            </div>
+            <div class="writeup-status">got the hardware, firmware extraction and attack surface mapping</div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
