@@ -19,8 +19,8 @@ body {
 }
 
 header {
-    margin-bottom: 64px;
-    padding-bottom: 32px;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
     border-bottom: 1px solid #e2e8f0;
 }
 
@@ -92,6 +92,12 @@ h1 {
 .nav-links a:hover {
     color: #2d3748;
     border-bottom-color: #2d3748;
+}
+
+.nav-links a.nav-active {
+    color: #2d3748;
+    border-bottom-color: #2d3748;
+    font-weight: 500;
 }
 
 .section-title {
@@ -221,6 +227,24 @@ h1 {
     margin-bottom: 16px;
     font-size: 16px;
     line-height: 1.7;
+}
+
+.about-label {
+    font-size: 12px !important;
+    font-family: 'Fira Code', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #a0aec0;
+    margin-bottom: 6px !important;
+}
+
+.about-intro {
+    font-size: 18px !important;
+    color: #1a202c;
+    font-weight: 500;
+    border-left: 3px solid #2d3748;
+    padding-left: 16px;
+    margin-bottom: 24px !important;
 }
 
 .content ul {
