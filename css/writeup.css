@@ -102,9 +102,6 @@ article {
     border-radius: 8px;
     border: 1px solid #e2e8f0;
     width: 100%;
-    max-width: 100%;
-    overflow-wrap: break-word;
-    word-break: break-word;
 }
 
 article h2 {
@@ -156,8 +153,6 @@ article li {
 article a {
     color: #4299e1;
     text-decoration: none;
-    overflow-wrap: break-word;
-    word-break: break-word;
 }
 
 article a:hover {
