@@ -161,7 +161,7 @@ code {
     border-radius: 3px;
     color: #2d3748;
     overflow-wrap: break-word;
-    word-break: break-word;
+    word-break: break-all;
 }
 
 pre {
@@ -181,6 +181,8 @@ pre code {
     color: #e2e8f0;
     font-size: 14px;
     line-height: 1.6;
+    word-break: normal;
+    overflow-wrap: normal;
 }
 
 .hljs {
