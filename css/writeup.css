@@ -5,17 +5,11 @@
     box-sizing: border-box;
 }
 
-html {
-    overflow-x: hidden;
-}
-
 body {
     font-family: 'DM Sans', sans-serif;
     background: #fafafa;
     color: #2d3748;
     line-height: 1.7;
-    overflow-x: hidden;
-    max-width: 100%;
 }
 
 .container {
@@ -317,7 +311,7 @@ pre:hover .copy-button {
     }
 
     article {
-        padding: 20px 16px;
+        padding: 24px;
     }
 
     pre {
