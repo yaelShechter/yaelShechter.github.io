@@ -5,12 +5,17 @@
     box-sizing: border-box;
 }
 
+html {
+    overflow-x: hidden;
+}
+
 body {
     font-family: 'DM Sans', sans-serif;
     background: #fafafa;
     color: #2d3748;
     line-height: 1.7;
     overflow-x: hidden;
+    max-width: 100%;
 }
 
 .container {
@@ -97,6 +102,9 @@ article {
     border-radius: 8px;
     border: 1px solid #e2e8f0;
     width: 100%;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 article h2 {
