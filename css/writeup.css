@@ -148,6 +148,8 @@ article li {
 article a {
     color: #4299e1;
     text-decoration: none;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 article a:hover {
