@@ -10,6 +10,7 @@ body {
     background: #fafafa;
     color: #2d3748;
     line-height: 1.7;
+    overflow-x: hidden;
 }
 
 .container {
@@ -311,10 +312,16 @@ pre:hover .copy-button {
     }
 
     article {
-        padding: 24px;
+        padding: 20px 16px;
     }
 
     pre {
         padding: 16px;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 }

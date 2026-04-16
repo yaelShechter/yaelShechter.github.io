@@ -10,6 +10,7 @@ body {
     background: #fafafa;
     color: #2d3748;
     line-height: 1.7;
+    overflow-x: hidden;
 }
 
 .container {
