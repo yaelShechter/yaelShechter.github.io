@@ -283,6 +283,16 @@ processed 32 bytes</code></pre>
 
         <p>The challenge is a reference to <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2012-6422" target="_blank" rel="noreferrer">CVE-2012-6422</a>. Samsung added a custom device called <code>/dev/exynos-mem</code> to their Exynos 4210/4412 kernel for GPU memory access, and accidentally set its permissions to world-readable/writable. Any app on the phone could open it and read/write all of physical memory. This challenge simulates that same situation.</p>
 
+        <h2>References</h2>
+        <ul>
+            <li><code>/dev/mem</code> man page: <a href="https://man7.org/linux/man-pages/man4/mem.4.html" target="_blank" rel="noreferrer">man7.org/linux/man-pages/man4/mem.4.html</a></li>
+            <li>Linux kernel credentials documentation: <a href="https://www.kernel.org/doc/Documentation/security/credentials.txt" target="_blank" rel="noreferrer">kernel.org/doc/.../credentials.txt</a></li>
+            <li>Linux kernel 3.11.4 <code>cred</code> struct source: <a href="https://elixir.bootlin.com/linux/v3.11.4/source/include/linux/cred.h#L102" target="_blank" rel="noreferrer">elixir.bootlin.com</a></li>
+            <li>Linux kernel 3.11.4 <code>task_struct</code> source: <a href="https://elixir.bootlin.com/linux/v3.11.4/source/include/linux/sched.h#L1027" target="_blank" rel="noreferrer">elixir.bootlin.com</a></li>
+            <li><code>/proc/self/comm</code> and process naming: <a href="https://man7.org/linux/man-pages/man5/proc_pid_comm.5.html" target="_blank" rel="noreferrer">man7.org/linux/man-pages/man5/proc_pid_comm.5.html</a></li>
+            <li><code>/proc/iomem</code> and physical memory layout: <a href="https://www.kernel.org/doc/Documentation/filesystems/proc.txt" target="_blank" rel="noreferrer">kernel.org/doc/.../proc.txt</a></li>
+            <li>CVE-2012-6422 (Samsung Exynos /dev/exynos-mem): <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2012-6422" target="_blank" rel="noreferrer">cve.mitre.org</a></li>
+        </ul>
     </article>
 </div>
 
