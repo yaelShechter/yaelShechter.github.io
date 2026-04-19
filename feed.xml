@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Yael Shechter | Security Research &amp; Binary Exploitation</title>
+    <link>https://yaelshechter.github.io/</link>
+    <description>Binary exploitation and vulnerability research writeups, focused on Linux internals and hands-on pwnable.kr challenges.</description>
+    <language>en-us</language>
+    <atom:link href="https://yaelshechter.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+
+    <item>
+      <title>pwnable.kr: exynos</title>
+      <link>https://yaelshechter.github.io/pwnable-exynos.html</link>
+      <guid>https://yaelshechter.github.io/pwnable-exynos.html</guid>
+      <pubDate>Sat, 01 Apr 2026 00:00:00 +0000</pubDate>
+      <description>CVE-2012-6422: ARM kernel exploitation via /dev/mem, physical memory scan and credential overwrite (Hacker's Secret)</description>
+    </item>
+
+    <item>
+      <title>pwnable.kr: brainfuck</title>
+      <link>https://yaelshechter.github.io/pwnable-brainfuck.html</link>
+      <guid>https://yaelshechter.github.io/pwnable-brainfuck.html</guid>
+      <pubDate>Sun, 01 Mar 2026 00:00:00 +0000</pubDate>
+      <description>GOT overwrite and function chaining in a brainfuck interpreter</description>
+    </item>
+
+    <item>
+      <title>pwnable.kr: horcrux</title>
+      <link>https://yaelshechter.github.io/pwnable-horcruxes.html</link>
+      <guid>https://yaelshechter.github.io/pwnable-horcruxes.html</guid>
+      <pubDate>Sun, 01 Feb 2026 00:00:00 +0000</pubDate>
+      <description>ROP chain and buffer overflow exploitation</description>
+    </item>
+
+    <item>
+      <title>pwnable.kr: syscall</title>
+      <link>https://yaelshechter.github.io/pwnable-syscall.html</link>
+      <guid>https://yaelshechter.github.io/pwnable-syscall.html</guid>
+      <pubDate>Thu, 01 Jan 2026 00:00:00 +0000</pubDate>
+      <description>Kernel syscall table manipulation and privilege escalation</description>
+    </item>
+
+    <item>
+      <title>pwnable.kr: ascii_easy</title>
+      <link>https://yaelshechter.github.io/pwnable-ascii_easy.html</link>
+      <guid>https://yaelshechter.github.io/pwnable-ascii_easy.html</guid>
+      <pubDate>Thu, 01 Jan 2026 00:00:00 +0000</pubDate>
+      <description>Buffer overflow with ASCII-only payload constraints</description>
+    </item>
+
+    <item>
+      <title>pwnable.kr: unlink</title>
+      <link>https://yaelshechter.github.io/pwnable-unlink.html</link>
+      <guid>https://yaelshechter.github.io/pwnable-unlink.html</guid>
+      <pubDate>Mon, 01 Dec 2025 00:00:00 +0000</pubDate>
+      <description>Heap exploitation via unlink attack technique</description>
+    </item>
+
+    <item>
+      <title>pwnable.kr: uaf</title>
+      <link>https://yaelshechter.github.io/pwnable-uaf.html</link>
+      <guid>https://yaelshechter.github.io/pwnable-uaf.html</guid>
+      <pubDate>Mon, 01 Dec 2025 00:00:00 +0000</pubDate>
+      <description>C++ use-after-free exploit with vtable hijacking</description>
+    </item>
+
+    <item>
+      <title>pwnable.kr: tiny_easy</title>
+      <link>https://yaelshechter.github.io/pwnable-tiny_easy.html</link>
+      <guid>https://yaelshechter.github.io/pwnable-tiny_easy.html</guid>
+      <pubDate>Mon, 01 Dec 2025 00:00:00 +0000</pubDate>
+      <description>90-byte binary with heap spraying and ASLR bypass</description>
+    </item>
+
+    <item>
+      <title>pwnable.kr: asm</title>
+      <link>https://yaelshechter.github.io/pwnable-asm.html</link>
+      <guid>https://yaelshechter.github.io/pwnable-asm.html</guid>
+      <pubDate>Sat, 01 Nov 2025 00:00:00 +0000</pubDate>
+      <description>Writing shellcode under seccomp sandbox restrictions</description>
+    </item>
+
+    <item>
+      <title>pwnable.kr: bof</title>
+      <link>https://yaelshechter.github.io/pwnable-bof.html</link>
+      <guid>https://yaelshechter.github.io/pwnable-bof.html</guid>
+      <pubDate>Sat, 01 Nov 2025 00:00:00 +0000</pubDate>
+      <description>Buffer overflow with stack canary enabled</description>
+    </item>
+
+    <item>
+      <title>pwnable.kr: leg</title>
+      <link>https://yaelshechter.github.io/pwnable-leg.html</link>
+      <guid>https://yaelshechter.github.io/pwnable-leg.html</guid>
+      <pubDate>Sat, 01 Nov 2025 00:00:00 +0000</pubDate>
+      <description>ARM assembly reverse engineering with PC register calculations</description>
+    </item>
+
+    <item>
+      <title>pwnable.kr: fd</title>
+      <link>https://yaelshechter.github.io/pwnable-fd.html</link>
+      <guid>https://yaelshechter.github.io/pwnable-fd.html</guid>
+      <pubDate>Sat, 01 Nov 2025 00:00:00 +0000</pubDate>
+      <description>File descriptor manipulation and Linux I/O fundamentals</description>
+    </item>
+
+  </channel>
+</rss>
